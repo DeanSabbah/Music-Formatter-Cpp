@@ -1,5 +1,6 @@
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <filesystem>
 #include <random>
@@ -23,16 +24,17 @@ class Indexer {
 
         inline fs::path get_base_path() const { return base_path; }
         inline int get_index_size() const { return index_size; }
-        inline std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>>* get_music_index() const { return music_index; }
+        inline auto get_music_index() const { return music_index; }
     private:
         // Member Variables
         fs::path base_path;
-
+        
+        // Map containing artists -> map containing albums -> vector containing tracks (and track paths)
         std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>>* music_index;
         int index_size;
 
         // Helper Functions
         void check_permission();
         std::string generate_random_string(int len, unsigned long long seed);
-        bool is_supported_type(const fs::path& path);
+        bool is_supported_type(const TagLib::FileRef& f) const;
 };

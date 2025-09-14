@@ -50,19 +50,22 @@ void Indexer::check_permission() {
     }
 }
 
-bool Indexer::is_supported_type(const fs::path& path){
-    TagLib::FileRef f(path.c_str());
+bool Indexer::is_supported_type(const TagLib::FileRef& f) const {
     return !f.isNull() && f.tag();
 }
 
 void Indexer::index_files() {
-    for(const fs::directory_entry & entry : fs::directory_iterator(base_path)){
-        if(is_supported_type(entry.path())){
-            std::cout<<"Yay, "<<entry.path().extension()<<" is supported!"<<std::endl;
-        }
-        else{
-            std::cout<<"Aww, "<<entry.path().extension()<<" isn't supported..."<<std::endl;
-        }
+    for(const fs::directory_entry & entry : fs::directory_iterator(base_path)) {
+        TagLib::FileRef f(entry.path().c_str());
+        if(!is_supported_type(f)) continue;
+
+        // Get relevant information from file
+        std::string artist = f.tag()->artist().toCString(), album = f.tag()->album().toCString(), track = f.tag()->title().toCString();
+        // Create map for artist
+        if(!music_index->count(artist)) music_index->emplace(artist, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>());
+        // Create map for album
+        if(!music_index->at(artist).count(album))music_index->at(artist).emplace(album, std::vector<std::pair<std::string, fs::path>>());
+        music_index->at(artist).at(album).push_back(std::pair(track, entry.path()));
     }
 }
 
