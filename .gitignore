@@ -1,0 +1,6 @@
+# vs code
+/.vscode
+# Debug
+/dbg
+#build
+/build
