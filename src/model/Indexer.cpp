@@ -1,8 +1,11 @@
 #include <iostream>
 
+#include <spdlog/spdlog.h>
+
 #include "Indexer.h"
 
 Indexer::Indexer(const fs::path& path) {
+    init_logger();
     set_base_path(path);
     music_index = new std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>>();
 }
@@ -11,10 +14,20 @@ Indexer::~Indexer() {
     delete music_index;
 }
 
+void Indexer::init_logger() {
+    try {
+        logger = spdlog::get("logger");
+    }
+    catch (const spdlog::spdlog_ex &ex) {
+        std::cout << "Log init failed: " << ex.what() << std::endl;
+    }
+}
+
 void Indexer::set_base_path(const fs::path& path) {
-    if(!fs::exists(path)){
+    if(!fs::exists(path) || !fs::is_directory(path)){
+        logger->warn("Directory {} does not exist or is not a directory", path.string());
         throw fs::filesystem_error(
-        "Path not found",
+        "Directory not found",
         path,
         std::make_error_code(std::errc::no_such_file_or_directory)
         );
@@ -41,11 +54,14 @@ std::string Indexer::generate_random_string(int len, unsigned long long seed = t
 
 void Indexer::check_permission() {
     std::string temp_dir = base_path.append(generate_random_string(20));
+    logger->info("Checking permission");
     try{
         fs::create_directory(temp_dir);
         fs::remove(temp_dir);
     }
-    catch (fs::filesystem_error fse){
+    catch (const fs::filesystem_error& fse){
+        if(fse.code() == std::errc::permission_denied) logger->error("Permission denied");
+        if(fse.code() == std::errc::file_exists) logger->error("File already exists");
         throw fse;
     }
 }
@@ -55,15 +71,17 @@ bool Indexer::is_supported_type(const TagLib::FileRef& f) const {
 }
 
 void Indexer::index_files() {
+    logger->info("Starting file indexing");
     for(const fs::directory_entry & entry : fs::directory_iterator(base_path)) {
         TagLib::FileRef f;
         try{
             if(!fs::exists(entry.path())) throw fs::filesystem_error("File no longer exists", entry.path(), std::make_error_code(std::errc::no_such_file_or_directory));
             f = TagLib::FileRef(entry.path().c_str());
         }
-        catch(fs::filesystem_error e){
+        catch(const fs::filesystem_error& e){
             if(e.code() == std::errc::no_such_file_or_directory) {
-                std::cout<<"Oh no, the file was delete or smt! 😏"<<std::endl;
+                logger->warn("File not found, continuing");
+                logger->debug("Missing file: {}", entry.path().string());
                 continue;
             }
         }
@@ -72,9 +90,16 @@ void Indexer::index_files() {
         // Get relevant information from file
         std::string artist = f.tag()->artist().toCString(), album = f.tag()->album().toCString(), track = f.tag()->title().toCString();
         // Create map for artist
-        if(!music_index->count(artist)) music_index->emplace(artist, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>());
-        // Create map for album
-        if(!music_index->at(artist).count(album))music_index->at(artist).emplace(album, std::vector<std::pair<std::string, fs::path>>());
+        if(!music_index->count(artist)) {
+            logger->debug("Adding {} to artist index", artist);
+            music_index->emplace(artist, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>());
+        }
+        // Add album vector to artist map
+        if(!music_index->at(artist).count(album)) {
+            logger->debug("Adding {} album to {} index", album, artist);
+            music_index->at(artist).emplace(album, std::vector<std::pair<std::string, fs::path>>());
+        }
+        logger->debug("Adding {} track to {} album", track, album);
         music_index->at(artist).at(album).push_back(std::pair(track, entry.path()));
     }
 }

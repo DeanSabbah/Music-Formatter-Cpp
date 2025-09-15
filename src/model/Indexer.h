@@ -24,6 +24,8 @@ class Indexer {
         void move_files();
 
         void set_base_path(const fs::path& path);
+        
+        void init_logger();
 
         inline fs::path get_base_path() const { return base_path; }
         inline int get_index_size() const { return index_size; }
@@ -31,6 +33,7 @@ class Indexer {
     private:
         // Member Variables
         fs::path base_path;
+        std::shared_ptr<spdlog::logger> logger;
         
         // Map containing artists -> map containing albums -> vector containing tracks (and track paths)
         std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>>* music_index;
