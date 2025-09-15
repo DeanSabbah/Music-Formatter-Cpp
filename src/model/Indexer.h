@@ -1,3 +1,6 @@
+#ifndef INDEXER_H
+#define INDEXER_H
+
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -38,3 +41,5 @@ class Indexer {
         std::string generate_random_string(int len, unsigned long long seed);
         bool is_supported_type(const TagLib::FileRef& f) const;
 };
+
+#endif

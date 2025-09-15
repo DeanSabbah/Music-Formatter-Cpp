@@ -56,7 +56,17 @@ bool Indexer::is_supported_type(const TagLib::FileRef& f) const {
 
 void Indexer::index_files() {
     for(const fs::directory_entry & entry : fs::directory_iterator(base_path)) {
-        TagLib::FileRef f(entry.path().c_str());
+        TagLib::FileRef f;
+        try{
+            if(!fs::exists(entry.path())) throw fs::filesystem_error("File no longer exists", entry.path(), std::make_error_code(std::errc::no_such_file_or_directory));
+            f = TagLib::FileRef(entry.path().c_str());
+        }
+        catch(fs::filesystem_error e){
+            if(e.code() == std::errc::no_such_file_or_directory) {
+                std::cout<<"Oh no, the file was delete or smt! 😏"<<std::endl;
+                continue;
+            }
+        }
         if(!is_supported_type(f)) continue;
 
         // Get relevant information from file

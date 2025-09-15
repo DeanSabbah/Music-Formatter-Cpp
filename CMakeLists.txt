@@ -5,6 +5,8 @@ set(PROJ_NAME "Music Formatter (C++)")
 project(${PROJ_NAME})
 
 find_package(TagLib REQUIRED)
+find_package(spdlog REQUIRED)
+
 file(GLOB APP_SOURCES "src/app/*.cpp")
 file(GLOB MODEL_SOURCES "src/model/*.cpp")
 
@@ -16,5 +18,5 @@ set_target_properties(music_formatter PROPERTIES
     OUTPUT_NAME "main"
 )
 
-
-target_link_libraries(music_formatter PRIVATE TagLib::TagLib) 
+target_link_libraries(music_formatter PRIVATE spdlog::spdlog)
+target_link_libraries(music_formatter PRIVATE TagLib::TagLib)
