@@ -29,6 +29,8 @@ int main(int argc, char const *argv[]) {
 
     indexer->write_json();
 
+    indexer->move_files();
+
     delete indexer;
 
     return 0;

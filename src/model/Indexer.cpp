@@ -51,7 +51,7 @@ std::string Indexer::generate_random_string(int len, unsigned long long seed = t
 }
 
 void Indexer::check_permission() {
-    std::string temp_dir = base_path.append(generate_random_string(20));
+    std::string temp_dir = base_path.string() + generate_random_string(20);
     logger->info("Checking permission");
     try{
         fs::create_directory(temp_dir);
@@ -142,4 +142,22 @@ void Indexer::write_json() {
 
 void Indexer::move_files() {
     check_permission();
+
+    for(const auto& artist : *music_index){
+        for(const auto& album : artist.second){
+            const std::string& artist_title = artist.first, album_title = album.first;
+            for(const auto& track : album.second){
+                const fs::path& track_path = track.second;
+                fs::path new_path = fs::path(base_path / artist_title / album_title);
+                try{
+                    fs::create_directories(new_path);
+                    fs::copy_file(track_path, new_path / track_path.filename());
+                    fs::remove(track_path);
+                }
+                catch(fs::filesystem_error fse){
+                    throw fse;
+                }
+            }
+        }
+    }
 }
