@@ -106,7 +106,7 @@ void Indexer::write_json() {
     check_permission();
 
     std::ofstream json("music_index.json");
-    json<<"{\n  ";
+    json<<"{";
     
     for(auto artistIt = music_index->cbegin(); artistIt != music_index->cend(); ++artistIt){
         const auto& artist = artistIt->first;
@@ -114,7 +114,7 @@ void Indexer::write_json() {
 
         bool lastArtist = std::next(artistIt) == music_index->cend();
 
-        json<<"  \""<<artist<<"\":\n  {\n";
+        json<<"\n  \""<<artist<<"\":\n  {\n";
 
         for(auto albumIt = albums.cbegin(); albumIt != albums.cend(); ++albumIt){
             const auto& album = albumIt->first;
@@ -122,7 +122,7 @@ void Indexer::write_json() {
 
             bool lastAlbum = std::next(albumIt) == albums.cend();
 
-            json<<"    \""<<album<<"\":\n  [\n";
+            json<<"    \""<<album<<"\":\n    [\n";
 
             for(const auto& track : tracks){
                 json<<"      \"";
@@ -133,7 +133,7 @@ void Indexer::write_json() {
             }
             json<<(lastAlbum ? "    ]\n" : "    ],\n");
         }
-        json<<(lastArtist ? "  }\n" : "  },\n");
+        json<<(lastArtist ? "  }\n" : "  },");
     }
     json<<"}"<<std::endl;
 
