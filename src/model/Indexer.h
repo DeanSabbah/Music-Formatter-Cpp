@@ -7,6 +7,8 @@
 #include <vector>
 #include <filesystem>
 #include <random>
+#include <iostream>
+#include <fstream>
 
 // TagLib import(s)
 #include <taglib/fileref.h>

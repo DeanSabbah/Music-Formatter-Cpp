@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include <spdlog/spdlog.h>
 
 #include "Indexer.h"
@@ -106,6 +104,40 @@ void Indexer::index_files() {
 
 void Indexer::write_json() {
     check_permission();
+
+    std::ofstream json("music_index.json");
+    json<<"{\n  ";
+    
+    for(auto artistIt = music_index->cbegin(); artistIt != music_index->cend(); ++artistIt){
+        const auto& artist = artistIt->first;
+        const auto& albums = artistIt->second;
+
+        bool lastArtist = std::next(artistIt) == music_index->cend();
+
+        json<<"  \""<<artist<<"\":\n  {\n";
+
+        for(auto albumIt = albums.cbegin(); albumIt != albums.cend(); ++albumIt){
+            const auto& album = albumIt->first;
+            const auto& tracks = albumIt->second;
+
+            bool lastAlbum = std::next(albumIt) == albums.cend();
+
+            json<<"    \""<<album<<"\":\n  [\n";
+
+            for(const auto& track : tracks){
+                json<<"      \"";
+                for(char c : track.first){
+                    json<<(c == '\031' ? '\'' : c);
+                }
+                json<<(&track == &tracks.back() ? "\"\n" : "\",\n");
+            }
+            json<<(lastAlbum ? "    ]\n" : "    ],\n");
+        }
+        json<<(lastArtist ? "  }\n" : "  },\n");
+    }
+    json<<"}"<<std::endl;
+
+    json.close();
 }
 
 void Indexer::move_files() {
