@@ -13,7 +13,7 @@ int main(int argc, char const *argv[]) {
     spdlog::set_default_logger(logger);
 
     spdlog::set_pattern("[%H:%M:%S] [%^---%L---%$] [thread %t] %v");
-    spdlog::set_level(spdlog::level::debug);
+    spdlog::set_level(spdlog::level::info);
 
     Indexer* indexer = new Indexer(fs::current_path());
     

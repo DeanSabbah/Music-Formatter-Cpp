@@ -143,18 +143,23 @@ void Indexer::write_json() {
 void Indexer::move_files() {
     check_permission();
 
+    logger->info("Moving files");
+    
     for(const auto& artist : *music_index){
         for(const auto& album : artist.second){
             const std::string& artist_title = artist.first, album_title = album.first;
             for(const auto& track : album.second){
                 const fs::path& track_path = track.second;
                 fs::path new_path = fs::path(base_path / artist_title / album_title);
+                logger->debug("Moving from >>" + track_path.string() + "<< to >>" + new_path.string() + "<<");
                 try{
                     fs::create_directories(new_path);
                     fs::copy_file(track_path, new_path / track_path.filename());
                     fs::remove(track_path);
                 }
                 catch(fs::filesystem_error fse){
+                    logger->critical("Error moving files");
+                    logger->critical(fse.what());
                     throw fse;
                 }
             }
