@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.18)
 set(PROJ_NAME "Music Formatter (C++)")
 project(${PROJ_NAME})
 
+enable_testing()
+add_subdirectory(Test)
+
 find_package(TagLib REQUIRED)
 find_package(spdlog REQUIRED)
 
@@ -18,5 +21,10 @@ set_target_properties(music_formatter PROPERTIES
     OUTPUT_NAME "main"
 )
 
-target_link_libraries(music_formatter PRIVATE spdlog::spdlog)
-target_link_libraries(music_formatter PRIVATE TagLib::TagLib)
+target_link_libraries(music_formatter
+    PRIVATE 
+       spdlog::spdlog
+       TagLib::TagLib
+)
+
+target_include_directories(music_formatter PRIVATE "${CMAKE_SOURCE_DIR}/includes")
