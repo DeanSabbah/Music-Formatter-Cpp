@@ -1,6 +1,6 @@
 #include <spdlog/spdlog.h>
 
-#include "Indexer.h"
+#include <model/Indexer.h>
 
 Indexer::Indexer(const fs::path& path) {
     init_logger();
