@@ -17,17 +17,17 @@ pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
 file(GLOB UI_SOURCES "src/ui/*.cpp")
 file(GLOB MODEL_SOURCES "src/model/*.cpp")
 
+include_directories("${CMAKE_SOURCE_DIR}/includes")
+
 if(Catch2_FOUND)
 
     add_executable(model_tests test/indexer_tests.cpp ${MODEL_SOURCES})
-
-    target_include_directories(model_tests PRIVATE "${CMAKE_SOURCE_DIR}/includes")
 
     target_link_libraries(model_tests 
     PRIVATE
         spdlog::spdlog
         TagLib::TagLib
-        Catch2::Catch2
+        Catch2::Catch2WithMain
     )
 
     include(CTest)
@@ -50,8 +50,6 @@ target_link_libraries(music_formatter_cli
         TagLib::TagLib
 )
 
-target_include_directories(music_formatter_cli PRIVATE "${CMAKE_SOURCE_DIR}/includes")
-
 add_executable(music_formatter src/ui/ui_main.cpp 
     ${UI_SOURCES}
     ${MODEL_SOURCES}
@@ -69,5 +67,3 @@ target_link_libraries(music_formatter
         spdlog::spdlog
         TagLib::TagLib
 )
-
-target_include_directories(music_formatter PRIVATE "${CMAKE_SOURCE_DIR}/includes")

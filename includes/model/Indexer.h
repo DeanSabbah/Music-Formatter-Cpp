@@ -21,6 +21,8 @@ namespace fs = std::filesystem;
 class Indexer {
     public:
         Indexer(const fs::path&);
+        Indexer(const spdlog::level::level_enum &level);
+        Indexer(const fs::path &path, const spdlog::level::level_enum &level);
         Indexer();
         ~Indexer();
 
@@ -32,8 +34,9 @@ class Indexer {
         void set_base_path(const fs::path& path);
         
         void init(const fs::path& path);
-        void init_logger(const spdlog::level::level_enum &level);
+        void init(const fs::path &path, const spdlog::level::level_enum &level);
         void init_logger();
+        void init_logger(const spdlog::level::level_enum &level);
 
         inline fs::path get_base_path() const { return base_path; }
         inline int get_index_size() const { return index_size; }
