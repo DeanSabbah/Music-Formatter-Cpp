@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.18)
 project(music_formatter VERSION 0.0.1 LANGUAGES CXX)
 
 set(APP_HUMAN_NAME "Music Formatter (C++)")
-
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -19,6 +18,7 @@ file(GLOB UI_SOURCES "src/ui/*.cpp")
 file(GLOB MODEL_SOURCES "src/model/*.cpp")
 
 if(Catch2_FOUND)
+
     add_executable(model_tests test/indexer_tests.cpp ${MODEL_SOURCES})
 
     target_include_directories(model_tests PRIVATE "${CMAKE_SOURCE_DIR}/includes")
