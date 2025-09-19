@@ -97,8 +97,6 @@ TEST_CASE("Check permission"){
 
     SECTION("Insufficient permission"){
         fs::permissions(fs::current_path() / "temp_dir", fs::perms::owner_read | fs::perms::group_read | fs::perms::others_read,fs::perm_options::replace);
-        try{std::ofstream("temp_dir/newfile");}
-        catch(std::exception e){}
         REQUIRE_THROWS_AS(indexer->check_permission(), fs::filesystem_error);
     }
 
