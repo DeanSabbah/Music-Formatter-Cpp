@@ -8,17 +8,33 @@ set(APP_HUMAN_NAME "Music Formatter (C++)")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-enable_testing()
-add_subdirectory(Test)
-
 find_package(TagLib REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(Catch2)
 
 pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
 
-file(GLOB UI_SOURCES "src/UI/*.cpp")
+file(GLOB UI_SOURCES "src/ui/*.cpp")
 file(GLOB MODEL_SOURCES "src/model/*.cpp")
+
+if(Catch2_FOUND)
+    add_executable(model_tests test/indexer_tests.cpp ${MODEL_SOURCES})
+
+    target_include_directories(model_tests PRIVATE "${CMAKE_SOURCE_DIR}/includes")
+
+    target_link_libraries(model_tests 
+    PRIVATE
+        spdlog::spdlog
+        TagLib::TagLib
+        Catch2::Catch2
+    )
+
+    include(CTest)
+    include(Catch)
+
+    catch_discover_tests(model_tests)
+endif(Catch2_FOUND)
 
 add_executable(music_formatter_cli src/main.cpp ${MODEL_SOURCES})
 
@@ -36,7 +52,7 @@ target_link_libraries(music_formatter_cli
 
 target_include_directories(music_formatter_cli PRIVATE "${CMAKE_SOURCE_DIR}/includes")
 
-add_executable(music_formatter src/UI/ui_main.cpp 
+add_executable(music_formatter src/ui/ui_main.cpp 
     ${UI_SOURCES}
     ${MODEL_SOURCES}
 )

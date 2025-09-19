@@ -1,4 +1,4 @@
-#include "ui_main.h"
+#include <ui/ui_main.h>
 #include <iostream>
 
 HelloWorld::HelloWorld()
