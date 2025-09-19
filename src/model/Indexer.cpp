@@ -2,30 +2,16 @@
 
 #include <model/Indexer.h>
 
-Indexer::Indexer(const fs::path& path) {
-    init(path);
-}
-
-Indexer::Indexer(const spdlog::level::level_enum& level) {
-    init(fs::current_path(), level);
-}
-
 Indexer::Indexer(const fs::path& path, const spdlog::level::level_enum& level) {
     init(path, level);
 }
 
-Indexer::Indexer() {
-    init(fs::current_path());    
-}
-
-void Indexer::init(const fs::path& path) {
-    init_logger();
-    set_base_path(path);
-    music_index = new std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>>();
+Indexer::Indexer(const spdlog::level::level_enum& level){
+    init(fs::current_path(), level);
 }
 
 void Indexer::init(const fs::path& path, const spdlog::level::level_enum& level) {
-    init_logger();
+    init_logger(level);
     set_base_path(path);
     music_index = new std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>>();
 }
@@ -34,7 +20,7 @@ Indexer::~Indexer() {
     delete music_index;
 }
 
-void Indexer::init_logger() {
+void Indexer::init_logger(const spdlog::level::level_enum& level) {
     try {
         logger = spdlog::get("logger");
         if (!logger) {
@@ -47,11 +33,6 @@ void Indexer::init_logger() {
     }
     
     spdlog::set_pattern("[%H:%M:%S] [%^---%L---%$] [thread %t] %v");
-    spdlog::set_level(spdlog::level::info);
-}
-
-void Indexer::init_logger(const spdlog::level::level_enum& level){
-    init_logger();
     spdlog::set_level(level);
 }
 
@@ -85,7 +66,7 @@ std::string Indexer::generate_random_string(int len, unsigned long long seed = t
 }
 
 void Indexer::check_permission() {
-    std::string temp_dir = base_path.string() + generate_random_string(20);
+    std::string temp_dir = base_path.string() + "/" + generate_random_string(20);
     logger->info("Checking permission");
     try{
         fs::create_directory(temp_dir);

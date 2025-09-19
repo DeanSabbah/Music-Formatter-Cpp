@@ -11,27 +11,30 @@
 Indexer* indexer;
 
 TEST_CASE("Basepath testing") {
-    indexer = new Indexer(spdlog::level::off);
+    indexer = new Indexer();
     fs::path expected_path = fs::current_path();
-
-    REQUIRE(indexer->get_base_path() == expected_path);
-
-    CHECK_THROWS_AS(indexer->set_base_path("Eat/My/Ass"), fs::filesystem_error);
     
-    fs::path new_path = fs::path(fs::current_path() / "test");
-    
-    fs::create_directories(new_path);
-    indexer->set_base_path(new_path);
-    
-    REQUIRE(indexer->get_base_path() == new_path);
+    SECTION("default path"){
+        REQUIRE(indexer->get_base_path() == expected_path);
+    }
+    SECTION("change to new path") {
+        REQUIRE_THROWS_AS(indexer->set_base_path("Eat/My/Ass"), fs::filesystem_error);
+        
+        fs::path new_path = fs::path(fs::current_path() / "test");
+        
+        fs::create_directories(new_path);
+        indexer->set_base_path(new_path);
+        
+        REQUIRE(indexer->get_base_path() == new_path);
 
-    fs::remove(new_path);
+        fs::remove(new_path);
+    }
 
     delete indexer;
 }
 
 TEST_CASE("Indexing files") {
-    indexer = new Indexer(spdlog::level::off);
+    indexer = new Indexer();
 
     std::unordered_set<std::string> artists(2);
     std::unordered_set<std::string> albums(4);
@@ -83,6 +86,28 @@ TEST_CASE("Indexing files") {
     for(auto file : track_paths){
         fs::remove(file);
     }
+
+    delete indexer;
+}
+
+TEST_CASE("Check permission"){
+    fs::create_directory(fs::current_path() / "temp_dir");
+
+    indexer = new Indexer(fs::current_path() / "temp_dir");
+
+    SECTION("Insufficient permission"){
+        fs::permissions(fs::current_path() / "temp_dir", fs::perms::owner_read | fs::perms::group_read | fs::perms::others_read,fs::perm_options::replace);
+        try{std::ofstream("temp_dir/newfile");}
+        catch(std::exception e){}
+        REQUIRE_THROWS_AS(indexer->check_permission(), fs::filesystem_error);
+    }
+
+    SECTION("With permission"){
+        fs::permissions(fs::current_path() / "temp_dir", fs::perms::owner_read | fs::perms::owner_write | fs::perms::owner_exec | fs::perms::group_read | fs::perms::group_exec | fs::perms::others_read | fs::perms::others_exec, fs::perm_options::replace);
+        REQUIRE_NOTHROW(indexer->check_permission());
+    }
+
+    fs::remove(fs::current_path() / "temp_dir");
 
     delete indexer;
 }

@@ -17,10 +17,10 @@ pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
 file(GLOB UI_SOURCES "src/ui/*.cpp")
 file(GLOB MODEL_SOURCES "src/model/*.cpp")
 
-include_directories("${CMAKE_SOURCE_DIR}/includes")
+include_directories("${CMAKE_SOURCE_DIR}/include")
 
 if(Catch2_FOUND)
-
+    # Make test program(s)
     add_executable(model_tests test/indexer_tests.cpp ${MODEL_SOURCES})
 
     target_link_libraries(model_tests 
@@ -28,6 +28,10 @@ if(Catch2_FOUND)
         spdlog::spdlog
         TagLib::TagLib
         Catch2::Catch2WithMain
+    )
+
+    set_target_properties(model_tests PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/Testing"
     )
 
     include(CTest)

@@ -20,10 +20,8 @@ namespace fs = std::filesystem;
 
 class Indexer {
     public:
-        Indexer(const fs::path&);
+        Indexer(const fs::path &path = fs::current_path(), const spdlog::level::level_enum &level = spdlog::level::off);
         Indexer(const spdlog::level::level_enum &level);
-        Indexer(const fs::path &path, const spdlog::level::level_enum &level);
-        Indexer();
         ~Indexer();
 
         // meat
@@ -33,10 +31,10 @@ class Indexer {
 
         void set_base_path(const fs::path& path);
         
-        void init(const fs::path& path);
         void init(const fs::path &path, const spdlog::level::level_enum &level);
-        void init_logger();
         void init_logger(const spdlog::level::level_enum &level);
+
+        void check_permission();
 
         inline fs::path get_base_path() const { return base_path; }
         inline int get_index_size() const { return index_size; }
@@ -51,7 +49,6 @@ class Indexer {
         int index_size;
 
         // Helper Functions
-        void check_permission();
         std::string generate_random_string(int len, unsigned long long seed);
         bool is_supported_type(const TagLib::FileRef& f) const;
 };
