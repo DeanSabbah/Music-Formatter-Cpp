@@ -11,10 +11,6 @@ namespace fs = std::filesystem;
 int main(int argc, char const *argv[]) {
 
     auto logger = spdlog::daily_logger_mt("logger", "logs/log");
-    spdlog::set_default_logger(logger);
-
-    spdlog::set_pattern("[%H:%M:%S] [%^---%L---%$] [thread %t] %v");
-    spdlog::set_level(spdlog::level::info);
 
     Indexer* indexer = new Indexer(fs::current_path());
     

@@ -14,12 +14,14 @@
 
 // spdlog imports(s)
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace fs = std::filesystem;
 
 class Indexer {
     public:
         Indexer(const fs::path&);
+        Indexer();
         ~Indexer();
 
         // meat
@@ -29,6 +31,8 @@ class Indexer {
 
         void set_base_path(const fs::path& path);
         
+        void init(const fs::path& path);
+        void init_logger(const spdlog::level::level_enum &level);
         void init_logger();
 
         inline fs::path get_base_path() const { return base_path; }

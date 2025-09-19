@@ -3,6 +3,14 @@
 #include <model/Indexer.h>
 
 Indexer::Indexer(const fs::path& path) {
+    init(path);
+}
+
+Indexer::Indexer() {
+    init(fs::current_path());    
+}
+
+void Indexer::init(const fs::path& path) {
     init_logger();
     set_base_path(path);
     music_index = new std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>>();
@@ -12,17 +20,29 @@ Indexer::~Indexer() {
     delete music_index;
 }
 
+void Indexer::init_logger(const spdlog::level::level_enum& level){
+    init_logger();
+    spdlog::set_level(level);
+}
+
 void Indexer::init_logger() {
     try {
         logger = spdlog::get("logger");
+        if (!logger) {
+            logger = spdlog::stdout_color_mt("logger");
+            spdlog::set_default_logger(logger);
+        }
     }
     catch (const spdlog::spdlog_ex &ex) {
         std::cout << "Log init failed: " << ex.what() << std::endl;
     }
+    
+    spdlog::set_pattern("[%H:%M:%S] [%^---%L---%$] [thread %t] %v");
+    spdlog::set_level(spdlog::level::info);
 }
 
 void Indexer::set_base_path(const fs::path& path) {
-    if(!fs::exists(path) || !fs::is_directory(path)){
+    if(!fs::is_directory(path) || !fs::exists(path)){
         logger->warn("Directory {} does not exist or is not a directory", path.string());
         throw fs::filesystem_error(
         "Directory not found",
