@@ -8,6 +8,9 @@ set(APP_HUMAN_NAME "Music Formatter (C++)")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+enable_testing()
+add_subdirectory(Test)
+
 find_package(TagLib REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -31,6 +34,8 @@ target_link_libraries(music_formatter_cli
         TagLib::TagLib
 )
 
+target_include_directories(music_formatter_cli PRIVATE "${CMAKE_SOURCE_DIR}/includes")
+
 add_executable(music_formatter src/UI/ui_main.cpp 
     ${UI_SOURCES}
     ${MODEL_SOURCES}
@@ -48,3 +53,5 @@ target_link_libraries(music_formatter
         spdlog::spdlog
         TagLib::TagLib
 )
+
+target_include_directories(music_formatter PRIVATE "${CMAKE_SOURCE_DIR}/includes")

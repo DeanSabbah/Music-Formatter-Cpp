@@ -1,9 +1,9 @@
 #include <iostream>
 
+#include <model/Indexer.h>
+
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/daily_file_sink.h>
-
-#include "model/Indexer.h"
 
 namespace fs = std::filesystem;
 

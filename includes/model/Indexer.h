@@ -3,7 +3,6 @@
 
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 #include <filesystem>
 #include <random>
@@ -12,6 +11,9 @@
 
 // TagLib import(s)
 #include <taglib/fileref.h>
+
+// spdlog imports(s)
+#include <spdlog/spdlog.h>
 
 namespace fs = std::filesystem;
 
