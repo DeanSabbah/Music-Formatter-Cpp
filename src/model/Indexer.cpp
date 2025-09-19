@@ -1,4 +1,5 @@
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/daily_file_sink.h>
 
 #include <model/Indexer.h>
 
@@ -24,7 +25,7 @@ void Indexer::init_logger(const spdlog::level::level_enum& level) {
     try {
         logger = spdlog::get("logger");
         if (!logger) {
-            logger = spdlog::stdout_color_mt("logger");
+            logger = spdlog::daily_logger_mt("logger", "logs/log");
             spdlog::set_default_logger(logger);
         }
     }
@@ -36,16 +37,27 @@ void Indexer::init_logger(const spdlog::level::level_enum& level) {
     spdlog::set_level(level);
 }
 
+fs::path Indexer::expand_user(const std::string& path) {
+    if (!path.empty() && path[0] == '~') {
+        const char* home = std::getenv("HOME");
+        if (home) {
+            return home + path.substr(1);
+        }
+    }
+    return path;
+}
+
 void Indexer::set_base_path(const fs::path& path) {
-    if(!fs::is_directory(path) || !fs::exists(path)){
-        logger->warn("Directory {} does not exist or is not a directory", path.string());
+    fs::path user_path = expand_user(path);
+    if(!fs::is_directory(user_path) || !fs::exists(user_path)){
+        logger->warn("Directory {} does not exist or is not a directory", user_path.string());
         throw fs::filesystem_error(
         "Directory not found",
-        path,
+        user_path,
         std::make_error_code(std::errc::no_such_file_or_directory)
         );
     }
-    base_path = path;
+    base_path = user_path;
 }
 
 std::string Indexer::generate_random_string(int len, unsigned long long seed = time(NULL)){
