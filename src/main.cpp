@@ -1,9 +1,9 @@
 #include <iostream>
 
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/daily_file_sink.h>
 
 #include "model/Indexer.h"
-#include "spdlog/sinks/daily_file_sink.h"
 
 namespace fs = std::filesystem;
 
@@ -23,7 +23,6 @@ int main(int argc, char const *argv[]) {
     catch(fs::filesystem_error fse){}
     
     std::cout<<indexer->get_base_path()<<std::endl;
-
 
     indexer->index_files();
 
