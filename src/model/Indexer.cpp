@@ -130,6 +130,7 @@ void Indexer::index_files() {
 }
 
 void Indexer::write_json() {
+    logger->info("Seriliazing and writting music index to JSON");
     check_permission();
 
     std::ofstream json("music_index.json");
@@ -154,7 +155,7 @@ void Indexer::write_json() {
             for(const auto& track : tracks){
                 json<<"      \"";
                 for(char c : track.first){
-                    json<<(c == '\031' ? '\'' : c);
+                    json<<(escape_char(c));
                 }
                 json<<(&track == &tracks.back() ? "\"\n" : "\",\n");
             }
@@ -165,6 +166,17 @@ void Indexer::write_json() {
     json<<"}"<<std::endl;
 
     json.close();
+}
+
+std::string Indexer::escape_char(const char& c) {
+    switch (c) {
+    case '\031':
+        return "\'";
+    case '"':
+        return "\\\"";
+    default:
+        return std::string(1, c);
+    }
 }
 
 void Indexer::move_files() {

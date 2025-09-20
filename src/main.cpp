@@ -16,9 +16,14 @@ int main(int argc, char const *argv[]) {
         .default_value(fs::current_path());
     
     program.add_argument("-l", "--log_level")
-        .help("Set what level of logs to log. Default is off")
+        .help("Set what level of logs to log. Default is off.")
         .default_value("off")
         .choices("off", "trace", "debug", "info", "warning", "error", "critical");
+
+    program.add_argument("-j", "--write_json")
+        .help("Create a json file that contains the index of the new file structure. Default is false")
+        .default_value(false)
+        .choices(true, false);
 
     Indexer* indexer;
 
@@ -41,11 +46,17 @@ int main(int argc, char const *argv[]) {
         indexer = new Indexer(level);
     }
 
+    auto logger = spdlog::get("logger");
+
+    logger->info("Beggining process");
+
     indexer->index_files();
 
-    indexer->write_json();
+    if(program.get<bool>("--write_json")) indexer->write_json();
 
     indexer->move_files();
+
+    logger->info("Process completed successfully");
 
     delete indexer;
 
