@@ -3,6 +3,8 @@
 #include <model/Indexer.h>
 
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/daily_file_sink.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <argparse/argparse.hpp>
 
@@ -12,17 +14,23 @@ int main(int argc, char const *argv[]) {
     argparse::ArgumentParser program("music_formatter_cli", "0.0.1");
 
     program.add_argument("-p", "--path")
-        .help("Set path that the program will target. Default is directory the program is located in.")
+        .help("Set path that the program will target")
         .default_value(fs::current_path());
     
     program.add_argument("-l", "--log_level")
-        .help("Set what level of logs to log. Default is off.")
+        .help("Set what level of logs to log")
         .default_value("off")
         .choices("off", "trace", "debug", "info", "warning", "error", "critical");
 
     program.add_argument("-j", "--write_json")
-        .help("Create a json file that contains the index of the new file structure. Default is false")
+        .help("Create a json file that contains the index of the new file structure")
         .default_value(false)
+        .choices(true, false);
+
+    program.add_argument("--verbose")
+        .help("Print logs to console. Default is false")
+        .default_value(false)
+        .implicit_value(true)
         .choices(true, false);
 
     Indexer* indexer;
@@ -39,16 +47,30 @@ int main(int argc, char const *argv[]) {
 
     spdlog::level::level_enum level = spdlog::level::from_str(program.get<std::string>("--log_level"));
 
-    if(program.is_used("--path")){
-        indexer = new Indexer(program.get<std::string>("--path"), level);
+    auto file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>("logs/log", 0, 0);
+    file_sink->set_pattern("[%H:%M:%S] [%^---%L---%$] [thread %t] %v");
+    file_sink->set_level(level);
+
+    if(program.get<bool>("--verbose")){
+        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        console_sink->set_pattern("%H:%M:%S: %v");
+        console_sink->set_level(spdlog::level::debug);
+
+        auto combined_logger = std::make_shared<spdlog::logger>("combined_logger", spdlog::sinks_init_list{file_sink, console_sink});
+        
+        spdlog::register_logger(combined_logger);
+        spdlog::set_default_logger(combined_logger);
     }
     else{
-        indexer = new Indexer(level);
+        auto file_logger = std::make_shared<spdlog::logger>("file_logger", file_sink);
+        spdlog::register_logger(file_logger);
+        spdlog::set_default_logger(file_logger);
     }
 
-    auto logger = spdlog::get("logger");
 
-    logger->info("Beggining process");
+    indexer = new Indexer(program.get<std::string>("--path"));
+    
+    spdlog::info("Beggining process");
 
     indexer->index_files();
 
@@ -56,7 +78,7 @@ int main(int argc, char const *argv[]) {
 
     indexer->move_files();
 
-    logger->info("Process completed successfully");
+    spdlog::info("Process completed successfully");
 
     delete indexer;
 

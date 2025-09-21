@@ -3,38 +3,13 @@
 
 #include <model/Indexer.h>
 
-Indexer::Indexer(const fs::path& path, const spdlog::level::level_enum& level) {
-    init(path, level);
-}
-
-Indexer::Indexer(const spdlog::level::level_enum& level){
-    init(fs::current_path(), level);
-}
-
-void Indexer::init(const fs::path& path, const spdlog::level::level_enum& level) {
-    init_logger(level);
+Indexer::Indexer(const fs::path& path) {
     set_base_path(path);
     music_index = new std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>>();
 }
 
 Indexer::~Indexer() {
     delete music_index;
-}
-
-void Indexer::init_logger(const spdlog::level::level_enum& level) {
-    try {
-        logger = spdlog::get("logger");
-        if (!logger) {
-            logger = spdlog::daily_logger_mt("logger", "logs/log");
-            spdlog::set_default_logger(logger);
-        }
-    }
-    catch (const spdlog::spdlog_ex &ex) {
-        std::cout << "Log init failed: " << ex.what() << std::endl;
-    }
-    
-    spdlog::set_pattern("[%H:%M:%S] [%^---%L---%$] [thread %t] %v");
-    spdlog::set_level(level);
 }
 
 fs::path Indexer::expand_user(const std::string& path) {
@@ -50,7 +25,7 @@ fs::path Indexer::expand_user(const std::string& path) {
 void Indexer::set_base_path(const fs::path& path) {
     fs::path user_path = expand_user(path);
     if(!fs::is_directory(user_path) || !fs::exists(user_path)){
-        logger->warn("Directory {} does not exist or is not a directory", user_path.string());
+        spdlog::warn("Directory {} does not exist or is not a directory", user_path.string());
         throw fs::filesystem_error(
         "Directory not found",
         user_path,
@@ -79,14 +54,14 @@ std::string Indexer::generate_random_string(int len, unsigned long long seed = t
 
 void Indexer::check_permission() {
     std::string temp_dir = base_path.string() + "/" + generate_random_string(20);
-    logger->info("Checking permission");
+    spdlog::info("Checking permission");
     try{
         fs::create_directory(temp_dir);
         fs::remove(temp_dir);
     }
     catch (const fs::filesystem_error& fse){
-        if(fse.code() == std::errc::permission_denied) logger->error("Permission denied");
-        if(fse.code() == std::errc::file_exists) logger->error("File already exists");
+        if(fse.code() == std::errc::permission_denied) spdlog::error("Permission denied");
+        if(fse.code() == std::errc::file_exists) spdlog::error("File already exists");
         throw fse;
     }
 }
@@ -96,7 +71,7 @@ bool Indexer::is_supported_type(const TagLib::FileRef& f) const {
 }
 
 void Indexer::index_files() {
-    logger->info("Starting file indexing");
+    spdlog::info("Starting file indexing");
     for(const fs::directory_entry & entry : fs::directory_iterator(base_path)) {
         TagLib::FileRef f;
         try{
@@ -105,8 +80,8 @@ void Indexer::index_files() {
         }
         catch(const fs::filesystem_error& e){
             if(e.code() == std::errc::no_such_file_or_directory) {
-                logger->warn("File not found, continuing");
-                logger->debug("Missing file: {}", entry.path().string());
+                spdlog::warn("File not found, continuing");
+                spdlog::debug("Missing file: {}", entry.path().string());
                 continue;
             }
         }
@@ -116,21 +91,24 @@ void Indexer::index_files() {
         std::string artist = f.tag()->artist().toCString(), album = f.tag()->album().toCString(), track = f.tag()->title().toCString();
         // Create map for artist
         if(!music_index->count(artist)) {
-            logger->debug("Adding {} to artist index", artist);
+            spdlog::debug("Adding {} to artist index", artist);
             music_index->emplace(artist, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>());
         }
         // Add album vector to artist map
         if(!music_index->at(artist).count(album)) {
-            logger->debug("Adding {} album to {} index", album, artist);
+            spdlog::debug("Adding {} album to {} index", album, artist);
             music_index->at(artist).emplace(album, std::vector<std::pair<std::string, fs::path>>());
         }
-        logger->debug("Adding {} track to {} album", track, album);
+        spdlog::debug("Adding {} track to {} album", track, album);
         music_index->at(artist).at(album).push_back(std::pair(track, entry.path()));
+        index_size++;
     }
+    spdlog::info("File indexing completed successfully");
+    spdlog::info("Added {} files to the index", index_size);
 }
 
 void Indexer::write_json() {
-    logger->info("Seriliazing and writting music index to JSON");
+    spdlog::info("Seriliazing and writting music index to JSON");
     check_permission();
 
     std::ofstream json("music_index.json");
@@ -166,6 +144,7 @@ void Indexer::write_json() {
     json<<"}"<<std::endl;
 
     json.close();
+    spdlog::info("Music index successfully serialized");
 }
 
 std::string Indexer::escape_char(const char& c) {
@@ -182,7 +161,9 @@ std::string Indexer::escape_char(const char& c) {
 void Indexer::move_files() {
     check_permission();
 
-    logger->info("Moving files");
+    spdlog::info("Moving files");
+
+    int files_moved = 0;
     
     for(const auto& artist : *music_index){
         for(const auto& album : artist.second){
@@ -190,18 +171,22 @@ void Indexer::move_files() {
             for(const auto& track : album.second){
                 const fs::path& track_path = track.second;
                 fs::path new_path = fs::path(base_path / artist_title / album_title);
-                logger->debug("Moving from >>" + track_path.string() + "<< to >>" + new_path.string() + "<<");
+                spdlog::debug("Moving from >>" + track_path.string() + "<< to >>" + new_path.string() + "<<");
                 try{
                     fs::create_directories(new_path);
                     fs::copy_file(track_path, new_path / track_path.filename());
                     fs::remove(track_path);
+                    files_moved++;
                 }
                 catch(fs::filesystem_error fse){
-                    logger->critical("Error moving files");
-                    logger->critical(fse.what());
+                    spdlog::critical("Error moving files");
+                    spdlog::critical(fse.what());
                     throw fse;
                 }
             }
         }
     }
+
+    spdlog::info("Files successfully moved");
+    spdlog::info("Moved {} files", files_moved);
 }

@@ -20,8 +20,7 @@ namespace fs = std::filesystem;
 
 class Indexer {
     public:
-        Indexer(const fs::path &path = fs::current_path(), const spdlog::level::level_enum &level = spdlog::level::off);
-        Indexer(const spdlog::level::level_enum &level);
+        Indexer(const fs::path &path = fs::current_path());
         ~Indexer();
 
         // meat
@@ -31,9 +30,6 @@ class Indexer {
 
         void set_base_path(const fs::path& path);
         
-        void init(const fs::path &path, const spdlog::level::level_enum &level);
-        void init_logger(const spdlog::level::level_enum &level);
-
         void check_permission();
 
         inline fs::path get_base_path() const { return base_path; }
@@ -42,11 +38,10 @@ class Indexer {
     private:
         // Member Variables
         fs::path base_path;
-        std::shared_ptr<spdlog::logger> logger;
+        int index_size = 0;
         
         // Map containing artists -> map containing albums -> vector containing tracks (and track paths)
         std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>>* music_index;
-        int index_size;
 
         // Helper Functions
         fs::path expand_user(const std::string& path);
