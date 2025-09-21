@@ -8,6 +8,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
 Indexer* indexer;
 
 TEST_CASE("Basepath testing") {
@@ -33,7 +37,7 @@ TEST_CASE("Basepath testing") {
     delete indexer;
 }
 
-TEST_CASE("Indexing files") {
+TEST_CASE("Index Functions") {
     indexer = new Indexer();
 
     std::unordered_set<std::string> artists(2);
@@ -68,24 +72,87 @@ TEST_CASE("Indexing files") {
         }
     }
 
-    indexer->index_files();
-    auto index = indexer->get_music_index();
+    SECTION("Index Files") {
+        indexer->index_files();
+        auto index = indexer->get_music_index();
 
-    REQUIRE_FALSE(index->size() == 0);
+        REQUIRE_FALSE(index->size() == 0);
 
-    for(auto artist : *index){
-        REQUIRE(artists.contains(artist.first));
-        for(auto album : artist.second){
-            REQUIRE((albums.contains(album.first) && album.first.starts_with(artist.first)));
-            for(auto track : album.second){
-                REQUIRE((tracks.contains(track.first) && track_paths.contains(track.second) && track.first.starts_with(album.first)));
+        for(auto artist : *index){
+            REQUIRE(artists.contains(artist.first));
+            for(auto album : artist.second){
+                REQUIRE((albums.contains(album.first) && album.first.starts_with(artist.first)));
+                for(auto track : album.second){
+                    REQUIRE((tracks.contains(track.first) && track_paths.contains(track.second) && track.first.starts_with(album.first)));
+                }
             }
         }
     }
 
-    for(auto file : track_paths){
-        fs::remove(file);
+    SECTION("Write JSON"){
+        indexer->index_files();
+        indexer->write_json();
+
+        REQUIRE(fs::exists("music_index.json"));
+
+        std::ifstream in(indexer->get_base_path() / "music_index.json");
+        REQUIRE(in.good());
+        nlohmann::json j;
+        in >> j;
+        REQUIRE(j.is_object());
+     
+        auto index = indexer->get_music_index();
+        for (const auto& [artist, albums] : *index) {
+            REQUIRE(j.contains(artist));
+            const auto& j_albums = j.at(artist);
+            REQUIRE(j_albums.is_object());
+            for (const auto& [album, tracks] : albums) {
+                REQUIRE(j_albums.contains(album));
+                const auto& j_tracks = j_albums.at(album);
+                REQUIRE(j_tracks.is_array());
+                for (const auto& [track, path] : tracks) {
+                    bool found = false;
+                    for (const auto& item : j_tracks) {
+                        if (fs::path(item.get<std::string>()) == track) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    REQUIRE(found);
+                }
+            }
+        }
+        fs::remove("music_index.json");
     }
+
+    SECTION("Move files"){
+        indexer->index_files();
+        auto index = indexer->get_music_index();
+        indexer->move_files();
+
+        for(const auto& file : track_paths){
+            REQUIRE_FALSE(fs::exists(file));
+        }
+
+        for(const auto& [artist, albums] : *index){
+            for(const auto& [album, tracks] : albums){
+                for(const auto& [title, path] : tracks){
+                    REQUIRE(fs::exists(indexer->get_base_path() / artist / album / path.filename()));
+                }
+            }
+        }
+    }
+    
+
+    for(const auto& [artist, albums] : *indexer->get_music_index()){
+            for(const auto& [album, tracks] : albums){
+                for(const auto& [title, path] : tracks){
+                    fs::remove(indexer->get_base_path() / artist / album / path.filename());
+                }
+                remove(indexer->get_base_path() / artist / album);
+            }
+            remove(indexer->get_base_path() / artist);
+        }
 
     delete indexer;
 }

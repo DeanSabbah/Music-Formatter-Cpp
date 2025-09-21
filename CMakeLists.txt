@@ -20,6 +20,7 @@ file(GLOB MODEL_SOURCES "src/model/*.cpp")
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
 if(Catch2_FOUND)
+    find_package(nlohmann_json 3 REQUIRED)
     # Make test program(s)
     add_executable(model_tests test/indexer_tests.cpp ${MODEL_SOURCES})
 
@@ -28,6 +29,7 @@ if(Catch2_FOUND)
         spdlog::spdlog
         TagLib::TagLib
         Catch2::Catch2WithMain
+        nlohmann_json::nlohmann_json
     )
 
     set_target_properties(model_tests PROPERTIES
