@@ -15,7 +15,7 @@ int main(int argc, char const *argv[]) {
 
     program.add_argument("-p", "--path")
         .help("Set path that the program will target")
-        .default_value(fs::current_path());
+        .default_value(fs::current_path().string());
     
     program.add_argument("-l", "--log_level")
         .help("Set what level of logs to log")
@@ -66,7 +66,6 @@ int main(int argc, char const *argv[]) {
         spdlog::register_logger(file_logger);
         spdlog::set_default_logger(file_logger);
     }
-
 
     indexer = new Indexer(program.get<std::string>("--path"));
     

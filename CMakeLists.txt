@@ -12,15 +12,15 @@ option(BUILD_GUI "Build GUI executable" ON)
 
 find_package(TagLib REQUIRED)
 find_package(spdlog REQUIRED)
-find_package(Catch2)
+find_package(Catch2 QUIET)
+find_package(nlohmann_json 3 QUIET)
 
 file(GLOB UI_SOURCES "src/ui/*.cpp")
 file(GLOB MODEL_SOURCES "src/model/*.cpp")
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
-if(Catch2_FOUND)
-    find_package(nlohmann_json 3 REQUIRED)
+if(Catch2_FOUND AND nlohmann_json_FOUND)
     # Make test program(s)
     add_executable(model_tests test/indexer_tests.cpp ${MODEL_SOURCES})
 
@@ -40,8 +40,14 @@ if(Catch2_FOUND)
     include(Catch)
 
     catch_discover_tests(model_tests)
-else(Catch2_FOUND)
-    message("Catch2 was not found. Skipping tests")
+else(Catch2_FOUND AND nlohmann_json_FOUND)
+    if(NOT Catch2_FOUND)
+        message(WARNING "Catch2 not found")
+    endif(NOT Catch2_FOUND)
+    if(NOT nlohmann_json_FOUND)
+        message(WARNING "Nlohmann JSON not found")
+    endif(NOT nlohmann_json_FOUND)
+    message(WARNING "Some test libraries not found, skipping tests")
 endif(Catch2_FOUND)
 
 if(BUILD_CLI)
