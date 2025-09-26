@@ -10,11 +10,15 @@
 
 #include <nlohmann/json.hpp>
 
+#include <spdlog/spdlog.h>
+
 using json = nlohmann::json;
 
 Indexer* indexer;
 
 TEST_CASE("Basepath testing") {
+    spdlog::set_level(spdlog::level::off);
+    
     indexer = new Indexer();
     fs::path expected_path = fs::current_path();
     
@@ -38,6 +42,8 @@ TEST_CASE("Basepath testing") {
 }
 
 TEST_CASE("Index Functions") {
+    spdlog::set_level(spdlog::level::off);
+    
     indexer = new Indexer();
 
     std::unordered_set<std::string> artists(2);
@@ -158,6 +164,8 @@ TEST_CASE("Index Functions") {
 }
 
 TEST_CASE("Check permission"){
+    spdlog::set_level(spdlog::level::off);
+    
     fs::create_directory(fs::current_path() / "temp_dir");
 
     indexer = new Indexer(fs::current_path() / "temp_dir");
