@@ -4,19 +4,20 @@
 #include <gtkmm/button.h>
 #include <gtkmm/window.h>
 
-class HelloWorld : public Gtk::Window
+#include <ui/elements/path_input.h>
+
+class GUI : public Gtk::Window
 {
 
 public:
-  HelloWorld();
-  ~HelloWorld() override;
+  GUI();
+  ~GUI() override;
 
 protected:
   //Signal handlers:
-  void on_button_clicked();
 
   //Member widgets:
-  Gtk::Button m_button;
+  PathInput path_widget;
 };
 
 #endif

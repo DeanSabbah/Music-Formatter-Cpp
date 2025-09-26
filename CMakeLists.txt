@@ -31,8 +31,8 @@ endif(NOT spdlog_FOUND)
 find_package(Catch2 QUIET)
 find_package(nlohmann_json 3 QUIET)
 
-file(GLOB UI_SOURCES "src/ui/*.cpp")
-file(GLOB MODEL_SOURCES "src/model/*.cpp")
+file(GLOB_RECURSE UI_SOURCES "src/ui/*.cpp")
+file(GLOB_RECURSE MODEL_SOURCES "src/model/*.cpp")
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
