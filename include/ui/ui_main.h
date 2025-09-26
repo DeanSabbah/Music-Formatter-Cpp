@@ -1,5 +1,5 @@
-#ifndef GTKMM_EXAMPLE_HELLOWORLD_H
-#define GTKMM_EXAMPLE_HELLOWORLD_H
+#ifndef UI_MAIN_H
+#define UI_MAIN_H
 
 #include <gtkmm/button.h>
 #include <gtkmm/window.h>

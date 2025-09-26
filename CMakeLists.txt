@@ -11,7 +11,23 @@ option(BUILD_CLI "Build CLI executable" ON)
 option(BUILD_GUI "Build GUI executable" ON)
 
 find_package(TagLib REQUIRED)
+if(NOT TagLib_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        TagLib
+        GIT_REPOSITORY https://github.com/taglib/taglib.git
+        GIT_TAG v2.1.1
+    )
+endif(NOT TagLib_FOUND)
 find_package(spdlog REQUIRED)
+if(NOT spdlog_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        spdlog
+        GIT_REPOSITORY https://github.com/gabime/spdlog.git
+        GIT_TAG v1.12.0
+    )
+endif(NOT spdlog_FOUND)
 find_package(Catch2 QUIET)
 find_package(nlohmann_json 3 QUIET)
 
@@ -48,10 +64,18 @@ else(Catch2_FOUND AND nlohmann_json_FOUND)
         message(WARNING "Nlohmann JSON not found")
     endif(NOT nlohmann_json_FOUND)
     message(WARNING "Some test libraries not found, skipping tests")
-endif(Catch2_FOUND)
+endif(Catch2_FOUND AND nlohmann_json_FOUND)
 
 if(BUILD_CLI)
     find_package(argparse REQUIRED)
+    if(NOT argparse_FOUND)
+        include(FetchContent)
+        FetchContent_Declare(
+            argparse
+            GIT_REPOSITORY https://github.com/p-ranav/argparse.git
+            GIT_TAG v3.0
+        )
+    endif(NOT argparse_FOUND)
 
     message("Building cli program")
     add_executable(music_formatter_cli src/main.cpp ${MODEL_SOURCES})
