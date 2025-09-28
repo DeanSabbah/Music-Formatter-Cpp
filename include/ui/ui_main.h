@@ -3,21 +3,24 @@
 
 #include <gtkmm/button.h>
 #include <gtkmm/window.h>
+#include <gtkmm/grid.h>
 
 #include <ui/elements/path_input.h>
+#include <ui/elements/control_panel.h>
 
-class GUI : public Gtk::Window
-{
-
+class GUI : public Gtk::Window {
 public:
-  GUI();
-  ~GUI() override;
+    GUI();
+    ~GUI() override;
 
 protected:
-  //Signal handlers:
+    //Signal handlers:
 
-  //Member widgets:
-  PathInput path_widget;
+    //Widget builders
+    //Member widgets:
+    Gtk::Grid*      grid;
+    PathInput*      path_widget;
+    ControlPanel*   control_widget;
 };
 
 #endif
