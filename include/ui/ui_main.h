@@ -7,6 +7,7 @@
 
 #include <ui/elements/path_input.h>
 #include <ui/elements/control_panel.h>
+#include <ui/elements/options.h>
 
 class GUI : public Gtk::Window {
 public:
@@ -21,6 +22,7 @@ protected:
     Gtk::Grid*      grid;
     PathInput*      path_widget;
     ControlPanel*   control_widget;
+    Options*        option_widget;
 };
 
 #endif
