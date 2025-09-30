@@ -14,14 +14,14 @@ public:
     GUI();
     ~GUI() override;
 
-protected:
-    //Signal handlers:
-
     //Member functions
     inline PathInput* get_path_widget() const { return path_widget; }
     inline ControlPanel* get_control_widget() const { return control_widget; }
     inline Options* get_option_widget() const { return option_widget; }
-    
+
+protected:
+    //Signal handlers:
+
     //Member widgets:
     Gtk::Grid*      grid;
     PathInput*      path_widget;
