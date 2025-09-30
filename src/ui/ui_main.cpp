@@ -3,6 +3,8 @@
 #include <iostream>
 
 GUI::GUI() {
+    set_resizable(false);
+    
     grid = new Gtk::Grid();
     path_widget = new PathInput(*this);
     option_widget = new Options();
