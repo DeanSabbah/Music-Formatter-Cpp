@@ -15,7 +15,12 @@ GUI::GUI() {
     set_child(*grid);
 }
 
-GUI::~GUI(){}
+GUI::~GUI(){
+    delete grid;
+    delete path_widget;
+    delete option_widget;
+    delete control_widget;
+}
 
 #include <gtkmm/application.h>
 

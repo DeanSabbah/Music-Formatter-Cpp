@@ -17,7 +17,7 @@ public:
 protected:
     //Signal handlers:
 
-    //Widget builders
+    //Member functions
     //Member widgets:
     Gtk::Grid*      grid;
     PathInput*      path_widget;
