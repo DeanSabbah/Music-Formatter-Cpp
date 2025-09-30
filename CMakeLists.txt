@@ -99,7 +99,7 @@ if(BUILD_GUI)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
 
-    add_executable(music_formatter src/ui/ui_main.cpp 
+    add_executable(music_formatter src/ui/gui.cpp 
         ${UI_SOURCES}
         ${MODEL_SOURCES}
     )
