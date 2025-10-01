@@ -1,4 +1,4 @@
-#include <ui/ui_main.h>
+#include <ui/gui.h>
 
 #include <iostream>
 
