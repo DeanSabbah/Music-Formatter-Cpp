@@ -2,6 +2,10 @@
 #include <iostream>
 
 Options::Options() : levels({ "Off", "Debug", "Info", "Warning", "Error", "Critical"}) {
+    set_margin(5);
+    set_halign(Gtk::Align::START);
+    set_valign(Gtk::Align::END);
+    
     json_check = new Gtk::CheckButton("Output JSON?");
     display_logs_check = new Gtk::CheckButton("Display Logs?");
 

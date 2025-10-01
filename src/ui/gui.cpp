@@ -3,6 +3,7 @@
 #include <iostream>
 
 GUI::GUI() {
+    set_resizable(false);
     grid = new Gtk::Grid();
     path_widget = new PathInput(*this);
     option_widget = new Options();
@@ -15,5 +16,9 @@ GUI::GUI() {
     set_child(*grid);
 }
 
-GUI::~GUI(){}
-
+GUI::~GUI(){
+    delete grid;
+    delete path_widget;
+    delete option_widget;
+    delete control_widget;
+}

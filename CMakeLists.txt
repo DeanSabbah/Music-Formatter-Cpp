@@ -99,6 +99,29 @@ if(BUILD_GUI)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
 
+    set(GTKMM_TARGET "")
+
+    if(TARGET PkgConfig::GTKMM)
+        set(GTKMM_TARGET PkgConfig::GTKMM)
+    else()
+        message(WARNING "gtkmm not found via pkg-config — falling back to FetchContent. This may build gtkmm from source and require many dependencies.")
+        include(FetchContent)
+        FetchContent_Declare(
+            gtkmm
+            GIT_REPOSITORY https://gitlab.gnome.org/GNOME/gtkmm.git
+            GIT_TAG 4.10.0
+        )
+        FetchContent_MakeAvailable(gtkmm)
+
+        if(TARGET gtkmm::gtkmm)
+            set(GTKMM_TARGET gtkmm::gtkmm)
+        elseif(TARGET gtkmm-4.0::gtkmm)
+            set(GTKMM_TARGET gtkmm-4.0::gtkmm)
+        else()
+            message(FATAL_ERROR "Unable to determine gtkmm CMake target after FetchContent; inspect the fetched gtkmm targets")
+        endif()
+    endif()
+
     add_executable(music_formatter src/ui/control.cpp 
         ${UI_SOURCES}
         ${MODEL_SOURCES}
@@ -112,7 +135,7 @@ if(BUILD_GUI)
 
     target_link_libraries(music_formatter 
         PRIVATE
-            PkgConfig::GTKMM
+            ${GTKMM_TARGET}
             spdlog::spdlog
             TagLib::TagLib
     )

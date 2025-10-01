@@ -19,6 +19,11 @@ protected:
     //Signal handlers:
 
     //Widget builders
+    //Member functions
+    inline PathInput* get_path_widget() const { return path_widget; }
+    inline ControlPanel* get_control_widget() const { return control_widget; }
+    inline Options* get_option_widget() const { return option_widget; }
+  
     //Member widgets:
     Gtk::Grid*      grid;
     PathInput*      path_widget;
