@@ -8,6 +8,7 @@
 #include <ui/elements/path_input.h>
 #include <ui/elements/control_panel.h>
 #include <ui/elements/options.h>
+#include <ui/elements/progress.h>
 
 class GUI : public Gtk::Window {
 public:

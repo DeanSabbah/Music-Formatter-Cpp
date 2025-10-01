@@ -3,6 +3,7 @@
 ControlPanel::ControlPanel() {
     run_button = new Gtk::Button("Run");
     run_button->set_margin(5);
+    ;
 
     cancel_button = new Gtk::Button("Cancel");
     cancel_button->set_margin(5);
