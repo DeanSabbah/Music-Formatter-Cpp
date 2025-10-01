@@ -1,6 +1,7 @@
 #include <iostream>
 
-#include <model/Indexer.h>
+#include <model/indexer.h>
+#include <ui/gui.h>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/daily_file_sink.h>
@@ -8,9 +9,16 @@
 
 #include <argparse/argparse.hpp>
 
+#include <gtkmm/application.h>
+
 namespace fs = std::filesystem;
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char **argv) {
+    if (argc == 1) {
+        auto app = Gtk::Application::create("com.deansabbah.music_formatter");
+        return app->make_window_and_run<GUI>(argc, argv);
+    }
+
     argparse::ArgumentParser program("music_formatter_cli", "0.0.1");
 
     program.add_argument("-p", "--path")

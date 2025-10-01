@@ -7,9 +7,6 @@ set(APP_HUMAN_NAME "Music Formatter (C++)")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(BUILD_CLI "Build CLI executable" ON)
-option(BUILD_GUI "Build GUI executable" ON)
-
 find_package(TagLib REQUIRED)
 if(NOT TagLib_FOUND)
     include(FetchContent)
@@ -19,6 +16,7 @@ if(NOT TagLib_FOUND)
         GIT_TAG v2.1.1
     )
 endif(NOT TagLib_FOUND)
+
 find_package(spdlog REQUIRED)
 if(NOT spdlog_FOUND)
     include(FetchContent)
@@ -28,6 +26,43 @@ if(NOT spdlog_FOUND)
         GIT_TAG v1.12.0
     )
 endif(NOT spdlog_FOUND)
+
+find_package(argparse REQUIRED)
+if(NOT argparse_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+        argparse
+        GIT_REPOSITORY https://github.com/p-ranav/argparse.git
+        GIT_TAG v3.0
+    )
+endif(NOT argparse_FOUND)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
+
+set(GTKMM_TARGET "")
+
+if(TARGET PkgConfig::GTKMM)
+    set(GTKMM_TARGET PkgConfig::GTKMM)
+else()
+    message(WARNING "gtkmm not found via pkg-config — falling back to FetchContent. This may build gtkmm from source and require many dependencies.")
+    include(FetchContent)
+    FetchContent_Declare(
+        gtkmm
+        GIT_REPOSITORY https://gitlab.gnome.org/GNOME/gtkmm.git
+        GIT_TAG 4.10.0
+    )
+    FetchContent_MakeAvailable(gtkmm)
+
+    if(TARGET gtkmm::gtkmm)
+        set(GTKMM_TARGET gtkmm::gtkmm)
+    elseif(TARGET gtkmm-4.0::gtkmm)
+        set(GTKMM_TARGET gtkmm-4.0::gtkmm)
+    else()
+        message(FATAL_ERROR "Unable to determine gtkmm CMake target after FetchContent; inspect the fetched gtkmm targets")
+    endif()
+endif()
+
 find_package(Catch2 QUIET)
 find_package(nlohmann_json 3 QUIET)
 
@@ -66,77 +101,26 @@ else(Catch2_FOUND AND nlohmann_json_FOUND)
     message(WARNING "Some test libraries not found, skipping tests")
 endif(Catch2_FOUND AND nlohmann_json_FOUND)
 
-if(BUILD_CLI)
-    find_package(argparse REQUIRED)
-    if(NOT argparse_FOUND)
-        include(FetchContent)
-        FetchContent_Declare(
-            argparse
-            GIT_REPOSITORY https://github.com/p-ranav/argparse.git
-            GIT_TAG v3.0
-        )
-    endif(NOT argparse_FOUND)
 
-    message("Building cli program")
-    add_executable(music_formatter_cli src/main.cpp ${MODEL_SOURCES})
 
-    set_target_properties(music_formatter_cli PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/dbg/cli"
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/build/cli"
-        OUTPUT_NAME "music_formatter_cli_${PROJECT_VERSION}"
-    )
+message("Building GUI program")
 
-    target_link_libraries(music_formatter_cli 
-        PRIVATE
-            spdlog::spdlog
-            TagLib::TagLib
-            argparse::argparse
-    )
-endif(BUILD_CLI)
 
-if(BUILD_GUI)
-    message("Building GUI program")
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
+add_executable(music_formatter src/main.cpp 
+    ${UI_SOURCES}
+    ${MODEL_SOURCES}
+)
 
-    set(GTKMM_TARGET "")
+set_target_properties(music_formatter PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/dbg/"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/build/"
+    OUTPUT_NAME "music_formatter_${PROJECT_VERSION}"
+)
 
-    if(TARGET PkgConfig::GTKMM)
-        set(GTKMM_TARGET PkgConfig::GTKMM)
-    else()
-        message(WARNING "gtkmm not found via pkg-config — falling back to FetchContent. This may build gtkmm from source and require many dependencies.")
-        include(FetchContent)
-        FetchContent_Declare(
-            gtkmm
-            GIT_REPOSITORY https://gitlab.gnome.org/GNOME/gtkmm.git
-            GIT_TAG 4.10.0
-        )
-        FetchContent_MakeAvailable(gtkmm)
-
-        if(TARGET gtkmm::gtkmm)
-            set(GTKMM_TARGET gtkmm::gtkmm)
-        elseif(TARGET gtkmm-4.0::gtkmm)
-            set(GTKMM_TARGET gtkmm-4.0::gtkmm)
-        else()
-            message(FATAL_ERROR "Unable to determine gtkmm CMake target after FetchContent; inspect the fetched gtkmm targets")
-        endif()
-    endif()
-
-    add_executable(music_formatter src/ui/control.cpp 
-        ${UI_SOURCES}
-        ${MODEL_SOURCES}
-    )
-
-    set_target_properties(music_formatter PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/dbg/gui"
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/build/gui"
-        OUTPUT_NAME "music_formatter_${PROJECT_VERSION}"
-    )
-
-    target_link_libraries(music_formatter 
-        PRIVATE
-            ${GTKMM_TARGET}
-            spdlog::spdlog
-            TagLib::TagLib
-    )
-endif(BUILD_GUI)
+target_link_libraries(music_formatter 
+    PRIVATE
+        ${GTKMM_TARGET}
+        spdlog::spdlog
+        TagLib::TagLib
+        argparse::argparse
+)

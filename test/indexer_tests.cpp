@@ -2,7 +2,7 @@
 #include <string>
 #include <unordered_set>
 
-#include <model/Indexer.h>
+#include <model/indexer.h>
 
 #include <taglib/fileref.h>
 
