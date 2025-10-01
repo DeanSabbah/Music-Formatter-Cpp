@@ -16,7 +16,6 @@ public:
     inline Gtk::DropDown*    get_log_level_select() const { return log_level_select; }
 private:
     void build_log_level_select();
-    void on_change();
 
     Gtk::CheckButton*   json_check;
     Gtk::CheckButton*   display_logs_check;

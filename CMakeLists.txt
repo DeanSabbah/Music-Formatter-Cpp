@@ -122,7 +122,7 @@ if(BUILD_GUI)
         endif()
     endif()
 
-    add_executable(music_formatter src/ui/gui.cpp
+    add_executable(music_formatter src/ui/control.cpp 
         ${UI_SOURCES}
         ${MODEL_SOURCES}
     )
