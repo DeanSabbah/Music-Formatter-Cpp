@@ -6,3 +6,4 @@
 /build
 #vcpkg
 /vcpkg_installed
+CMakeUserPresets.json
