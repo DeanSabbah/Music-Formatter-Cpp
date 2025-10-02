@@ -1,0 +1,8 @@
+{
+  "dependencies": [
+    "argparse",
+    "spdlog",
+    "taglib",
+    "gtkmm"
+  ]
+}
