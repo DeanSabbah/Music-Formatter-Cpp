@@ -4,6 +4,7 @@
 #include <gtkmm/button.h>
 #include <gtkmm/window.h>
 #include <gtkmm/grid.h>
+#include <gtkmm/messagedialog.h>
 
 #include <ui/elements/path_input.h>
 #include <ui/elements/control_panel.h>
