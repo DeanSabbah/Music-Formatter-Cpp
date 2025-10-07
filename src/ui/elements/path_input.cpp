@@ -5,6 +5,8 @@ PathInput::PathInput(Gtk::Window& root) :  root_(root){
     make_path_select();
     make_path_field();
 
+    auto thing = path_field->get_text();
+
     append(*path_field);
     append(*path_select);
 }
