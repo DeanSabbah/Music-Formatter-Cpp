@@ -28,7 +28,6 @@ find_package(TagLib CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(argparse CONFIG REQUIRED)
 find_package(PkgConfig REQUIRED)
-message(${PKG_CONFIG_FOUND})    
 pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
 
 find_package(Catch2 QUIET)
