@@ -7,10 +7,12 @@ set(APP_HUMAN_NAME "Music Formatter (C++)")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(ZLIB REQUIRED)
 find_package(TagLib CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(argparse CONFIG REQUIRED)
 find_package(PkgConfig REQUIRED)
+message(${PKG_CONFIG_FOUND})    
 pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
 
 find_package(Catch2 QUIET)
@@ -63,14 +65,15 @@ add_executable(music_formatter src/main.cpp
 
 set_target_properties(music_formatter PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/dbg/"
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/build/"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/release/"
     OUTPUT_NAME "music_formatter_${PROJECT_VERSION}"
 )
 
 target_link_libraries(music_formatter 
     PRIVATE
-        ${GTKMM_TARGET}
+        PkgConfig::GTKMM
         spdlog::spdlog
+        ZLIB::ZLIB
         TagLib::TagLib
         argparse::argparse
 )

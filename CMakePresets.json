@@ -7,15 +7,23 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/vcpkg",
       "cacheVariables": {
-        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "/home/deansabbah/Programs/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja",
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     }
   ],
   "buildPresets": [
     {
-      "name": "vcpkg",
+      "name": "vcpkg-debug",
       "configurePreset": "vcpkg",
       "configuration": "Debug"
+    },
+    {
+      "name": "vcpkg-release", 
+      "configurePreset": "vcpkg",
+      "configuration": "Release"
     }
   ],
   "testPresets": [
