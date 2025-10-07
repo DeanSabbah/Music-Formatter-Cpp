@@ -1,6 +1,8 @@
 #ifndef UI_MAIN_H
 #define UI_MAIN_H
 
+#include <spdlog/spdlog.h>
+
 #include <gtkmm/button.h>
 #include <gtkmm/window.h>
 #include <gtkmm/grid.h>

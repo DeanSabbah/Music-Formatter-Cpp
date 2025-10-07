@@ -27,6 +27,7 @@ GUI::~GUI(){
     delete control_widget;
 }
 void GUI::make_signals() {
+    option_widget->get_log_level_select()->property_selected().signal_changed().connect(sigc::mem_fun(*this, &GUI::on_log_select));
     option_widget->get_display_logs_check()->signal_toggled().connect(sigc::mem_fun(*this, &GUI::on_message_box_check));
     control_widget->get_run_button()->signal_clicked().connect(sigc::mem_fun(*this, &GUI::on_run));
 }

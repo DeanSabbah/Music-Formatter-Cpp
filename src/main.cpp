@@ -15,6 +15,7 @@ namespace fs = std::filesystem;
 
 int main(int argc, char **argv) {
     if (argc == 1) {
+        spdlog::set_level(spdlog::level::off);
         auto app = Gtk::Application::create("com.deansabbah.music_formatter");
         return app->make_window_and_run<GUI>(argc, argv);
     }
