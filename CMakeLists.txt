@@ -7,6 +7,22 @@ set(APP_HUMAN_NAME "Music Formatter (C++)")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CPACK_PACKAGE_NAME "music-formatter")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Music metadata formatter tool")
+set(CPACK_PACKAGE_VENDOR "Dean Sabbah")
+set(CPACK_PACKAGE_CONTACT "deansabbah@cmail.carleton.ca")
+
+# Set package generators
+set(CPACK_GENERATOR "DEB;TGZ")
+
+# Debian-specific settings
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgtkmm-4.0-0, libtagc0, libspdlog1")
+set(CPACK_DEBIAN_PACKAGE_SECTION "multimedia")
+
+# Include CPack
+include(CPack)
+
 find_package(ZLIB REQUIRED)
 find_package(TagLib CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
