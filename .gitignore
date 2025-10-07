@@ -1,6 +1,9 @@
 # vs code
 /.vscode
-# Debug
-/dbg
 #build
 /build
+/release
+/dbg
+#vcpkg
+/vcpkg_installed
+CMakeUserPresets.json

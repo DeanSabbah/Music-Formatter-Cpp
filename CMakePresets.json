@@ -1,0 +1,36 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "linux-native",
+      "displayName": "Linux (native)",
+      "description": "Native Linux build (uses vcpkg manifest, linux triplet)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux",
+      "toolchainFile": "/home/deansabbah/Programs/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VCPKG_MANIFEST_MODE": "ON",
+        "VCPKG_APPLOCAL_DEPS": "ON",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic",
+        "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja"
+      }
+    },
+    {
+      "name": "windows-mingw-vcpkg",
+      "displayName": "Windows (MinGW + vcpkg)",
+      "description": "Cross-compile for Windows using vcpkg toolchain + TC-mingw.cmake",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/windows",
+      "toolchainFile": "/home/deansabbah/Programs/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/TC-mingw.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows",
+        "VCPKG_MANIFEST_MODE": "ON",
+        "PKG_CONFIG_EXECUTABLE": "/usr/bin/x86_64-w64-mingw32-pkg-config",
+        "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja"
+      }
+    }
+  ]
+}
