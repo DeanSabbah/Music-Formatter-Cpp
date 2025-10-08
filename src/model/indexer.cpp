@@ -73,6 +73,19 @@ bool Indexer::is_supported_type(const TagLib::FileRef& f) const {
 void Indexer::index_files() {
     spdlog::info("Starting file indexing");
     for(const fs::directory_entry & entry : fs::directory_iterator(base_path)) {
+        // Check for cancelation
+        if (cancel_requested.load()) {
+            spdlog::info("Indexing cancelled");
+            return;
+        }
+        if (paused.load()) {
+            std::unique_lock<std::mutex> lk(pause_mutex);
+            pause_cv.wait(lk, [this]{ return !paused.load() || cancel_requested.load(); });
+            if (cancel_requested.load()) {
+                spdlog::info("Indexing cancelled while paused");
+                return;
+            }
+        }
         TagLib::FileRef f;
         try{
             if(!fs::exists(entry.path())) throw fs::filesystem_error("File no longer exists", entry.path(), std::make_error_code(std::errc::no_such_file_or_directory));
@@ -131,6 +144,19 @@ void Indexer::write_json() {
             json<<"    \""<<album<<"\":\n    [\n";
 
             for(const auto& track : tracks){
+                // Check for cancelation
+                if (cancel_requested.load()) {
+                    spdlog::info("JSON cancelled");
+                    return;
+                }
+                if (paused.load()) {
+                    std::unique_lock<std::mutex> lk(pause_mutex);
+                    pause_cv.wait(lk, [this]{ return !paused.load() || cancel_requested.load(); });
+                    if (cancel_requested.load()) {
+                        spdlog::info("JSON cancelled while paused");
+                        return;
+                    }
+                }
                 json<<"      \"";
                 for(char c : track.first){
                     json<<(escape_char(c));
@@ -169,6 +195,20 @@ void Indexer::move_files() {
         for(const auto& album : artist.second){
             const std::string& artist_title = artist.first, album_title = album.first;
             for(const auto& track : album.second){
+                // Check for cancelation
+                if (cancel_requested.load()) {
+                    spdlog::info("Move cancelled");
+                    return;
+                }
+                if (paused.load()) {
+                    std::unique_lock<std::mutex> lk(pause_mutex);
+                    pause_cv.wait(lk, [this]{ return !paused.load() || cancel_requested.load(); });
+                    if (cancel_requested.load()) {
+                        spdlog::info("Move cancelled while paused");
+                        return;
+                    }
+                }
+                
                 const fs::path& track_path = track.second;
                 fs::path new_path = fs::path(base_path / artist_title / album_title);
                 spdlog::debug("Moving from >>" + track_path.string() + "<< to >>" + new_path.string() + "<<");
@@ -189,4 +229,35 @@ void Indexer::move_files() {
 
     spdlog::info("Files successfully moved");
     spdlog::info("Moved {} files", files_moved);
+}
+
+void Indexer::run_all(bool json) {
+    index_files();
+    if(cancel_requested.load()) return;
+    progress.store(0.2f);
+    if(json) {
+        write_json();
+        if(cancel_requested.load()) return;
+    }
+    progress.store(0.3f);
+    move_files();
+    progress.store(1.0f);
+}
+
+void Indexer::pause() {
+    paused.store(true);
+}
+
+void Indexer::resume() {
+    paused.store(false);
+    pause_cv.notify_all();
+}
+
+void Indexer::request_cancel() {
+    cancel_requested.store(true);
+    pause_cv.notify_all();
+}
+
+void Indexer::clear_cancel() {
+    cancel_requested.store(false);
 }

@@ -22,6 +22,10 @@ Options::~Options() {
     delete log_level_select;
 }
 
+Glib::ustring Options::get_selected_level() {
+    return levels[log_level_select->get_selected()];
+}
+
 void Options::build_log_level_select() {
     log_options = Gtk::StringList::create(levels);
     

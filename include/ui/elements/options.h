@@ -11,6 +11,8 @@ public:
     Options();
     ~Options();
 
+    Glib::ustring get_selected_level();
+
     inline Gtk::CheckButton* get_json_check() const { return json_check; }
     inline Gtk::CheckButton* get_display_logs_check() const { return display_logs_check; }
     inline Gtk::DropDown*    get_log_level_select() const { return log_level_select; }

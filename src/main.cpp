@@ -15,7 +15,6 @@ namespace fs = std::filesystem;
 
 int main(int argc, char **argv) {
     if (argc == 1) {
-        spdlog::set_level(spdlog::level::off);
         auto app = Gtk::Application::create("com.deansabbah.music_formatter");
         return app->make_window_and_run<GUI>(argc, argv);
     }
@@ -25,7 +24,7 @@ int main(int argc, char **argv) {
     program.add_argument("-p", "--path")
         .help("Set path that the program will target")
         .default_value(fs::current_path().string());
-    
+
     program.add_argument("-l", "--log_level")
         .help("Set what level of logs to log")
         .default_value("off")
@@ -66,7 +65,7 @@ int main(int argc, char **argv) {
         console_sink->set_level(spdlog::level::debug);
 
         auto combined_logger = std::make_shared<spdlog::logger>("combined_logger", spdlog::sinks_init_list{file_sink, console_sink});
-        
+
         spdlog::register_logger(combined_logger);
         spdlog::set_default_logger(combined_logger);
     }
@@ -77,7 +76,7 @@ int main(int argc, char **argv) {
     }
 
     indexer = new Indexer(program.get<std::string>("--path"));
-    
+
     spdlog::info("Beggining process");
 
     indexer->index_files();

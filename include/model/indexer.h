@@ -8,6 +8,9 @@
 #include <random>
 #include <iostream>
 #include <fstream>
+#include <atomic>
+#include <mutex>
+#include <condition_variable>
 
 // TagLib import(s)
 #include <taglib/fileref.h>
@@ -28,9 +31,18 @@ class Indexer {
         void write_json();
         void move_files();
 
+        void run_all(bool json = true);
+
         void set_base_path(const fs::path& path);
         
         void check_permission();
+        
+        void pause();
+        void resume();
+        void request_cancel();
+        void clear_cancel();
+
+        inline float get_progress() const { return progress.load(); }
 
         inline fs::path get_base_path() const { return base_path; }
         inline int get_index_size() const { return index_size; }
@@ -39,6 +51,13 @@ class Indexer {
         // Member Variables
         fs::path base_path;
         int index_size = 0;
+
+        std::atomic<float>              progress{0.0f};
+
+        mutable std::mutex              pause_mutex;
+        std::condition_variable         pause_cv;
+        std::atomic<bool>               paused{false};
+        std::atomic<bool>               cancel_requested{false};
         
         // Map containing artists -> map containing albums -> vector containing tracks (and track paths)
         std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::pair<std::string, fs::path>>>>* music_index;

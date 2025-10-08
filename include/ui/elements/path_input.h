@@ -13,6 +13,8 @@ public:
     PathInput(Gtk::Window& root);
     ~PathInput();
 
+    
+
     inline Glib::ustring get_inputed_path() const { return path_field->get_text(); }
 
     inline Gtk::Button* get_path_button() const { return path_select; }

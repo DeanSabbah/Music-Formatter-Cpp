@@ -1,27 +1,11 @@
 cmake_minimum_required(VERSION 3.18)
 
 # Name of project
-project(music_formatter VERSION 0.0.1 LANGUAGES CXX)
+project(music_formatter VERSION 1.0.0 LANGUAGES CXX)
 
 set(APP_HUMAN_NAME "Music Formatter (C++)")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CPACK_PACKAGE_NAME "music-formatter")
-set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Music metadata formatter tool")
-set(CPACK_PACKAGE_VENDOR "Dean Sabbah")
-set(CPACK_PACKAGE_CONTACT "deansabbah@cmail.carleton.ca")
-
-# Set package generators
-set(CPACK_GENERATOR "DEB;TGZ")
-
-# Debian-specific settings
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgtkmm-4.0-0, libtagc0, libspdlog1")
-set(CPACK_DEBIAN_PACKAGE_SECTION "multimedia")
-
-# Include CPack
-include(CPack)
 
 find_package(ZLIB REQUIRED)
 find_package(TagLib CONFIG REQUIRED)
@@ -92,3 +76,39 @@ target_link_libraries(music_formatter
         TagLib::TagLib
         argparse::argparse
 )
+
+install(TARGETS music_formatter
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/resources
+    DESTINATION .
+    OPTIONAL
+)
+install(DIRECTORY ${CMAKE_BINARY_DIR}/
+    DESTINATION .
+    FILES_MATCHING
+      PATTERN "*.so"
+      PATTERN "*.so.*"
+      PATTERN "*.dll"
+      PATTERN "*.dylib"
+    PATTERN "_CPack_Packages" EXCLUDE
+    PATTERN "CMakeFiles" EXCLUDE
+)
+
+set(CPACK_PACKAGE_NAME "music_formatter")
+set(CPACK_PACKAGE_VENDOR "Dean Sabbah")
+set(CPACK_PACKAGE_CONTACT "deansabbah@cmail.carleton.ca")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Music Formatter (C++)")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "MusicFormatter")
+
+set(CPACK_GENERATOR "TGZ;ZIP;DEB") 
+
+include(InstallRequiredSystemLibraries)
+
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libgtk-4-1, zlib1g, libtagc0, libspdlog1")
+
+include(CPack)
