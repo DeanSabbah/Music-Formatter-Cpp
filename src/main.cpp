@@ -47,7 +47,6 @@ int main(int argc, char **argv) {
         program.parse_args(argc, argv);
     }
     catch(const std::exception& err){
-        std::cout<<":("<<std::endl;
         std::cerr << err.what() << std::endl;
         std::cerr << program;
         std::exit(1);
