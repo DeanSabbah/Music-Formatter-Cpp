@@ -3,7 +3,7 @@
 #build
 /build
 /release
-/dbg
+/debug
 #vcpkg
 /vcpkg_installed
 CMakeUserPresets.json

@@ -2,34 +2,54 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "linux-native",
-      "displayName": "Linux (native)",
-      "description": "Native Linux build (uses vcpkg manifest, linux triplet)",
+      "name": "base-config",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/linux",
-      "toolchainFile": "/home/deansabbah/Programs/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "VCPKG_MANIFEST_MODE": "ON",
-        "VCPKG_APPLOCAL_DEPS": "ON",
-        "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic",
-        "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja"
+        "VCPKG_APPLOCAL_DEPS": "ON"
       }
     },
     {
-      "name": "windows-mingw-vcpkg",
-      "displayName": "Windows (MinGW + vcpkg)",
-      "description": "Cross-compile for Windows using vcpkg toolchain + TC-mingw.cmake",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/windows",
-      "toolchainFile": "/home/deansabbah/Programs/vcpkg/scripts/buildsystems/vcpkg.cmake",
+      "name": "linux-debug",
+      "inherits": "base-config",
+      "displayName": "Linux (debug)",
+      "description": "Native Linux build (uses vcpkg manifest, linux triplet)",
+      "binaryDir": "${sourceDir}/build/linux/debug",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic"
+      }
+    },
+    {
+      "name": "linux-release",
+      "inherits": "linux-debug",
+      "displayName": "Linux (release)",
+      "description": "Native Linux build (uses vcpkg manifest, linux triplet)",
+      "binaryDir": "${sourceDir}/build/linux/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "windows-debug",
+      "inherits": "base-config",
+      "displayName": "Windows (debug)",
+      "description": "Cross-compile for Windows using vcpkg toolchain + TC-mingw.cmake",
+      "binaryDir": "${sourceDir}/build/windows/debug",
+      "cacheVariables": {
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/TC-mingw.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows",
-        "VCPKG_MANIFEST_MODE": "ON",
-        "PKG_CONFIG_EXECUTABLE": "/usr/bin/x86_64-w64-mingw32-pkg-config",
-        "CMAKE_MAKE_PROGRAM": "/usr/bin/ninja"
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
+      }
+    },
+    {
+      "name": "windows-release",
+      "inherits": "windows-debug",
+      "displayName": "Windows (release)",
+      "description": "Cross-compile for Windows using vcpkg toolchain + TC-mingw.cmake",
+      "binaryDir": "${sourceDir}/build/windows/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ]

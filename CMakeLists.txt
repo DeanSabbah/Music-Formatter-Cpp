@@ -63,7 +63,7 @@ add_executable(music_formatter src/main.cpp
 )
 
 set_target_properties(music_formatter PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/dbg/"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_SOURCE_DIR}/debug/"
     RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_SOURCE_DIR}/release/"
     OUTPUT_NAME "music_formatter_${PROJECT_VERSION}"
 )
