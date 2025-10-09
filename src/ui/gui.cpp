@@ -59,11 +59,10 @@ GUI::~GUI(){
     delete control_widget;
 }
 void GUI::make_signals() {
-    signal_close_request().connect(sigc::mem_fun(*this, &GUI::on_close_request), false);
     option_widget->get_log_level_select()->property_selected().signal_changed().connect(sigc::mem_fun(*this, &GUI::on_log_select));
     option_widget->get_display_logs_check()->signal_toggled().connect(sigc::mem_fun(*this, &GUI::on_message_box_check));
     control_widget->get_run_button()->signal_clicked().connect(sigc::mem_fun(*this, &GUI::on_run));
-    control_widget->get_cancel_button()->signal_clicked().connect(sigc::mem_fun(*this, &GUI::close));
+    control_widget->get_close_button()->signal_clicked().connect(sigc::mem_fun(*this, &GUI::close));
     control_widget->get_cancel_button()->signal_clicked().connect(sigc::mem_fun(*this, &GUI::on_cancel));
 }
 
@@ -126,9 +125,8 @@ void GUI::on_cancel() {
 }
 
 bool GUI::on_close_request() {
-    if(worker && model) {
-        model->pause();
-    }
+    if(worker && model) model->pause();
+
     auto confirm_dialog = new Gtk::MessageDialog(*this,
                                                 "Are you sure you want to quit?",
                                                 false,
@@ -137,14 +135,24 @@ bool GUI::on_close_request() {
                                                 true
     );
     confirm_dialog->set_title("Quit?");
+    confirm_dialog->set_transient_for(*this);
 
-    bool quit;
-
-    confirm_dialog->signal_response().connect([this, &quit, confirm_dialog](int response_id) {
-        quit = response_id == Gtk::ResponseType::CANCEL;
+    auto loop = Glib::MainLoop::create();
+    int response = Gtk::ResponseType::CANCEL;
+    confirm_dialog->signal_response().connect([&](int resp) {
+        response = resp;
+        loop->quit();
     });
 
-    return quit;
+    confirm_dialog->show();
+    loop->run();
+
+    confirm_dialog->hide();
+    delete confirm_dialog;
+
+    if(worker && model) model->resume();
+
+    return response != Gtk::ResponseType::OK;
 }
 
 void GUI::run_start() {

@@ -67,6 +67,7 @@ class Indexer {
         std::string generate_random_string(int len, unsigned long long seed);
         bool is_supported_type(const TagLib::FileRef& f) const;
         std::string escape_char(const char& c);
+        bool interruptible_sleep(std::chrono::milliseconds dur);
 };
 
 #endif
