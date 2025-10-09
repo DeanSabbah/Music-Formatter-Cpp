@@ -45,6 +45,7 @@ private:
     void on_message_box_check();
     void on_run();
     void on_cancel();
+    bool on_close_request();
   
     //Member widgets:
     Gtk::Grid*      grid;

@@ -1,7 +1,5 @@
 #include <ui/gui.h>
 
-#include <iostream>
-
 GUI::GUI() {
     set_resizable(false);
     
@@ -64,6 +62,7 @@ void GUI::make_signals() {
     option_widget->get_log_level_select()->property_selected().signal_changed().connect(sigc::mem_fun(*this, &GUI::on_log_select));
     option_widget->get_display_logs_check()->signal_toggled().connect(sigc::mem_fun(*this, &GUI::on_message_box_check));
     control_widget->get_run_button()->signal_clicked().connect(sigc::mem_fun(*this, &GUI::on_run));
+    control_widget->get_close_button()->signal_clicked().connect(sigc::mem_fun(*this, &GUI::close));
     control_widget->get_cancel_button()->signal_clicked().connect(sigc::mem_fun(*this, &GUI::on_cancel));
 }
 
@@ -125,13 +124,44 @@ void GUI::on_cancel() {
     confirm_dialog->show();
 }
 
+bool GUI::on_close_request() {
+    if(worker && model) model->pause();
+
+    auto confirm_dialog = new Gtk::MessageDialog(*this,
+                                                "Are you sure you want to quit?",
+                                                false,
+                                                Gtk::MessageType::QUESTION,
+                                                Gtk::ButtonsType::OK_CANCEL,
+                                                true
+    );
+    confirm_dialog->set_title("Quit?");
+    confirm_dialog->set_transient_for(*this);
+
+    auto loop = Glib::MainLoop::create();
+    int response = Gtk::ResponseType::CANCEL;
+    confirm_dialog->signal_response().connect([&](int resp) {
+        response = resp;
+        loop->quit();
+    });
+
+    confirm_dialog->show();
+    loop->run();
+
+    confirm_dialog->hide();
+    delete confirm_dialog;
+
+    if(worker && model) model->resume();
+
+    return response != Gtk::ResponseType::OK;
+}
+
 void GUI::run_start() {
     path_widget->hide();
     progress_widget->show();
 
     option_widget->set_sensitive(false);
-    control_widget->get_run_button()->set_sensitive(false);
-    control_widget->get_cancel_button()->set_sensitive(true);
+    control_widget->switch_state(false);
+
 
     bool json = option_widget->get_json_check()->get_active();
 
@@ -145,6 +175,8 @@ void GUI::run_start() {
 }
 
 void GUI::run_end() {
+    stop_progress_timer();
+
     if (worker) {
         if (worker->joinable()) worker->join();
         delete worker;
@@ -158,8 +190,7 @@ void GUI::run_end() {
     progress_widget->hide();
 
     option_widget->set_sensitive(true);
-    control_widget->get_run_button()->set_sensitive(true);
-    control_widget->get_cancel_button()->set_sensitive(false);
+    control_widget->switch_state(true);
 }
 
 void GUI::start_progress_timer(unsigned int interval_ms) {
