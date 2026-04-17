@@ -24,6 +24,7 @@ else()
     get_filename_component(_VCPKG_EXECUTABLE_REAL "${_VCPKG_EXECUTABLE}" REALPATH)
     get_filename_component(_VCPKG_ROOT "${_VCPKG_EXECUTABLE_REAL}" DIRECTORY)
     unset(_VCPKG_EXECUTABLE CACHE)
+    unset(_VCPKG_EXECUTABLE_REAL CACHE)
 endif()
 
 set(_VCPKG_CMAKE "${_VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
