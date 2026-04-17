@@ -28,6 +28,8 @@ if(NOT CMAKE_RC_COMPILER)
     endif()
 endif()
 
+# Do not set CMAKE_FIND_ROOT_PATH here: when used as a vcpkg chainload toolchain,
+# vcpkg provides target-specific roots and package search paths.
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
@@ -37,5 +39,7 @@ if(NOT DEFINED PKG_CONFIG_EXECUTABLE)
     find_program(MINGW_PKG_CONFIG NAMES ${MINGW_TRIPLET_PREFIX}-pkg-config)
     if(MINGW_PKG_CONFIG)
         set(PKG_CONFIG_EXECUTABLE "${MINGW_PKG_CONFIG}" CACHE FILEPATH "pkg-config for the target" FORCE)
+    else()
+        message(STATUS "MinGW pkg-config executable '${MINGW_TRIPLET_PREFIX}-pkg-config' not found; gtkmm resolution can still proceed via CMake config packages.")
     endif()
 endif()
