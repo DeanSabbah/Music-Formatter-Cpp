@@ -4,11 +4,13 @@
     {
       "name": "base-config",
       "generator": "Ninja",
-      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "toolchainFile": "${sourceDir}/cmake/vcpkg-toolchain.cmake",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "VCPKG_MANIFEST_MODE": "ON",
-        "VCPKG_APPLOCAL_DEPS": "ON"
+        "VCPKG_APPLOCAL_DEPS": "ON",
+        "VCPKG_LIBRARY_LINKAGE": "dynamic",
+        "VCPKG_CRT_LINKAGE": "dynamic"
       }
     },
     {
@@ -39,7 +41,7 @@
       "binaryDir": "${sourceDir}/build/windows/debug",
       "cacheVariables": {
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/TC-mingw.cmake",
-        "VCPKG_TARGET_TRIPLET": "x64-windows"
+        "VCPKG_TARGET_TRIPLET": "x64-mingw-dynamic"
       }
     },
     {

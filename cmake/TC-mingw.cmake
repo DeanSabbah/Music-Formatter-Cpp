@@ -1,14 +1,46 @@
-set(CMAKE_SYSTEM_NAME Windows)
+include_guard(GLOBAL)
 
-set(CMAKE_C_COMPILER   x86_64-w64-mingw32-gcc)
-set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
+set(CMAKE_SYSTEM_NAME Windows CACHE STRING "" FORCE)
+set(CMAKE_SYSTEM_PROCESSOR x86_64 CACHE STRING "" FORCE)
 
-set(MINGW_PREFIX "/usr/x86_64-w64-mingw32")
-set(CMAKE_FIND_ROOT_PATH ${MINGW_PREFIX})
+set(MINGW_TRIPLET_PREFIX "x86_64-w64-mingw32" CACHE STRING "MinGW target prefix")
 
+if(NOT CMAKE_C_COMPILER)
+    find_program(MINGW_C_COMPILER NAMES ${MINGW_TRIPLET_PREFIX}-gcc)
+    if(NOT MINGW_C_COMPILER)
+        message(FATAL_ERROR "Could not find MinGW C compiler '${MINGW_TRIPLET_PREFIX}-gcc' in PATH.")
+    endif()
+    set(CMAKE_C_COMPILER "${MINGW_C_COMPILER}" CACHE FILEPATH "" FORCE)
+endif()
+
+if(NOT CMAKE_CXX_COMPILER)
+    find_program(MINGW_CXX_COMPILER NAMES ${MINGW_TRIPLET_PREFIX}-g++)
+    if(NOT MINGW_CXX_COMPILER)
+        message(FATAL_ERROR "Could not find MinGW C++ compiler '${MINGW_TRIPLET_PREFIX}-g++' in PATH.")
+    endif()
+    set(CMAKE_CXX_COMPILER "${MINGW_CXX_COMPILER}" CACHE FILEPATH "" FORCE)
+endif()
+
+if(NOT CMAKE_RC_COMPILER)
+    find_program(MINGW_RC_COMPILER NAMES ${MINGW_TRIPLET_PREFIX}-windres)
+    if(MINGW_RC_COMPILER)
+        set(CMAKE_RC_COMPILER "${MINGW_RC_COMPILER}" CACHE FILEPATH "" FORCE)
+    endif()
+endif()
+
+# Behavioral change from the old toolchain: do not set CMAKE_FIND_ROOT_PATH
+# directly here. When used as a vcpkg chainload toolchain, vcpkg provides
+# target-specific roots and package search paths.
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-set(PKG_CONFIG_EXECUTABLE "/usr/bin/x86_64-w64-mingw32-pkg-config" CACHE FILEPATH "pkg-config for the target")
+if(NOT DEFINED PKG_CONFIG_EXECUTABLE)
+    find_program(MINGW_PKG_CONFIG NAMES ${MINGW_TRIPLET_PREFIX}-pkg-config)
+    if(MINGW_PKG_CONFIG)
+        set(PKG_CONFIG_EXECUTABLE "${MINGW_PKG_CONFIG}" CACHE FILEPATH "pkg-config for the target" FORCE)
+    else()
+        message(STATUS "MinGW pkg-config executable '${MINGW_TRIPLET_PREFIX}-pkg-config' not found; GTKmm resolution can still proceed via CMake config packages.")
+    endif()
+endif()
