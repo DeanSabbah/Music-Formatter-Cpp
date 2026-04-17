@@ -27,6 +27,10 @@ else()
     set(GTKMM_TARGET PkgConfig::GTKMM)
 endif()
 
+if(NOT GTKMM_TARGET)
+    message(FATAL_ERROR "GTKmm was not found. Tried CMake package targets (gtkmm::gtkmm, unofficial::gtkmm::gtkmm, gtkmm) and pkg-config module gtkmm-4.0.")
+endif()
+
 find_package(Catch2 QUIET)
 find_package(nlohmann_json 3 QUIET)
 
