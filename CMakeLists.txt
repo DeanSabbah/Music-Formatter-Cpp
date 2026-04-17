@@ -6,13 +6,26 @@ project(music_formatter VERSION 1.0.0 LANGUAGES CXX)
 set(APP_HUMAN_NAME "Music Formatter (C++)")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH ON)
 
 find_package(ZLIB REQUIRED)
 find_package(TagLib CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(argparse CONFIG REQUIRED)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
+
+set(GTKMM_TARGET "")
+find_package(gtkmm CONFIG QUIET)
+if(TARGET gtkmm::gtkmm)
+    set(GTKMM_TARGET gtkmm::gtkmm)
+elseif(TARGET unofficial::gtkmm::gtkmm)
+    set(GTKMM_TARGET unofficial::gtkmm::gtkmm)
+elseif(TARGET gtkmm)
+    set(GTKMM_TARGET gtkmm)
+else()
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
+    set(GTKMM_TARGET PkgConfig::GTKMM)
+endif()
 
 find_package(Catch2 QUIET)
 find_package(nlohmann_json 3 QUIET)
@@ -70,7 +83,7 @@ set_target_properties(music_formatter PROPERTIES
 
 target_link_libraries(music_formatter 
     PRIVATE
-        PkgConfig::GTKMM
+        ${GTKMM_TARGET}
         spdlog::spdlog
         ZLIB::ZLIB
         TagLib::TagLib
