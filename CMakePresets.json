@@ -17,7 +17,7 @@
       "name": "linux-debug",
       "inherits": "base-config",
       "displayName": "Linux (debug)",
-      "description": "Native Linux build (uses vcpkg manifest, linux triplet)",
+      "description": "Native Linux build via vcpkg manifest mode",
       "binaryDir": "${sourceDir}/build/linux/debug",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-linux-dynamic"
@@ -27,7 +27,7 @@
       "name": "linux-release",
       "inherits": "linux-debug",
       "displayName": "Linux (release)",
-      "description": "Native Linux build (uses vcpkg manifest, linux triplet)",
+      "description": "Native Linux release build via vcpkg manifest mode",
       "binaryDir": "${sourceDir}/build/linux/release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
@@ -37,7 +37,7 @@
       "name": "windows-debug",
       "inherits": "base-config",
       "displayName": "Windows (debug)",
-      "description": "Cross-compile for Windows using vcpkg toolchain + TC-mingw.cmake",
+      "description": "Cross-compile to Windows (MinGW) via vcpkg manifest mode",
       "binaryDir": "${sourceDir}/build/windows/debug",
       "cacheVariables": {
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/TC-mingw.cmake",
@@ -48,11 +48,29 @@
       "name": "windows-release",
       "inherits": "windows-debug",
       "displayName": "Windows (release)",
-      "description": "Cross-compile for Windows using vcpkg toolchain + TC-mingw.cmake",
+      "description": "Cross-compile to Windows (MinGW) release via vcpkg manifest mode",
       "binaryDir": "${sourceDir}/build/windows/release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "linux-debug",
+      "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-release",
+      "configurePreset": "linux-release"
+    },
+    {
+      "name": "windows-debug",
+      "configurePreset": "windows-debug"
+    },
+    {
+      "name": "windows-release",
+      "configurePreset": "windows-release"
     }
   ]
 }

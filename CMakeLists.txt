@@ -6,15 +6,15 @@ project(music_formatter VERSION 1.0.0 LANGUAGES CXX)
 set(APP_HUMAN_NAME "Music Formatter (C++)")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH ON)
 
+# Dependencies are resolved via CMake package configs/imported targets (vcpkg manifest mode).
 find_package(ZLIB REQUIRED)
 find_package(TagLib CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(argparse CONFIG REQUIRED)
+find_package(gtkmm CONFIG REQUIRED)
 
 set(GTKMM_TARGET "")
-find_package(gtkmm CONFIG QUIET)
 if(TARGET gtkmm::gtkmm)
     set(GTKMM_TARGET gtkmm::gtkmm)
 elseif(TARGET unofficial::gtkmm::gtkmm)
@@ -22,12 +22,10 @@ elseif(TARGET unofficial::gtkmm::gtkmm)
 elseif(TARGET gtkmm)
     set(GTKMM_TARGET gtkmm)
 else()
-    if(gtkmm_FOUND)
-        message(STATUS "gtkmm CMake config was found but none of these targets were exported: gtkmm::gtkmm, unofficial::gtkmm::gtkmm, or gtkmm. Falling back to pkg-config.")
-    endif()
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
-    set(GTKMM_TARGET PkgConfig::GTKMM)
+    message(FATAL_ERROR
+        "gtkmm was found via CMake config, but no supported imported target was exported. "
+        "Expected one of: gtkmm::gtkmm, unofficial::gtkmm::gtkmm, gtkmm."
+    )
 endif()
 
 find_package(Catch2 QUIET)
